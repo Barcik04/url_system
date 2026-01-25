@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: urlsystem-db-dev
+    environment:
+      POSTGRES_DB: url_system
+      POSTGRES_USER: igor
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    ports:
+      - "5309:5432"
+    volumes:
+      - db_dev_data:/data/postgres
+    networks:
+      - backend
+
+volumes:
+  db_dev_data:
+
+networks:
+  backend:
