@@ -8,7 +8,7 @@ CREATE SEQUENCE user_sequence
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
                                      id BIGINT PRIMARY KEY DEFAULT nextval('user_sequence'),
                                      username VARCHAR(100) NOT NULL UNIQUE,
                                      password VARCHAR(255) NOT NULL,
@@ -16,4 +16,3 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 
-CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
