@@ -1,10 +1,13 @@
 package com.example.url_system.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -25,6 +28,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role =  Role.USER;
+
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private Set<Url> urls = new HashSet<>();
 
 
     public User(String username, String password, Role role) {
@@ -68,6 +76,18 @@ public class User {
         this.role = role;
     }
 
+    public Set<Url> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(Set<Url> urls) {
+        this.urls = urls;
+    }
+
+    public void addUrl(Url url) {
+        this.urls.add(url);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -79,4 +99,6 @@ public class User {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+
 }
