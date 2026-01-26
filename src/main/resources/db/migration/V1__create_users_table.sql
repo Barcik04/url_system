@@ -1,7 +1,7 @@
 -- V1__create_users_table.sql
 -- Creates users table + sequence for id generation
 
-CREATE SEQUENCE IF NOT EXISTS user_sequence
+CREATE SEQUENCE user_sequence
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE

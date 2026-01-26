@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS
+CREATE TABLE
     urls (
                       id BIGSERIAL PRIMARY KEY,
 
