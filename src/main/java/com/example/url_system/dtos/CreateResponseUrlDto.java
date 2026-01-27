@@ -10,6 +10,7 @@ import java.time.Instant;
  * @param expiresAt time of expiry
  */
 public record CreateResponseUrlDto(
+        String url,
         String shortUrl,
         Instant createdAt,
         Instant expiresAt

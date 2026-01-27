@@ -6,9 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
@@ -113,5 +116,77 @@ public class GlobalExceptionHandler {
         log.warn("Constraint violation on {} {} {} {}", request.getMethod(), request.getRequestURI(), e.getMessage(), apiError.status());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatusException(
+            ResponseStatusException e,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
+        String message = e.getReason() != null
+                ? e.getReason()
+                : status.getReasonPhrase();
+
+        if (status.is4xxClientError()) {
+            log.warn("Client error {}: {}", status.value(), message);
+        } else {
+            log.error("Server error {}: {}", status.value(), message, e);
+        }
+
+        ApiError apiError = new ApiError(
+                message,
+                status.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return new ResponseEntity<>(apiError, status);
+    }
+
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResourceFound(
+            NoResourceFoundException e,
+            HttpServletRequest request) {
+
+
+        ApiError apiError = new ApiError(
+                e.getMessage(),
+                404,
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.debug("NOT_FOUND method={} path={} status={} message={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    }
+
+
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiError> handleAuthorizationDeniedException(
+            AuthorizationDeniedException e,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                e.getMessage(),
+                HttpStatus.FORBIDDEN.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.warn("Acess denied {} {} {} {}", request.getMethod(), request.getRequestURI(), e.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
     }
 }
