@@ -7,3 +7,10 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - dependencies
+
+    ignore:
+    # Ignore ALL major version updates (x.x.0 → y.y.0)
+    - dependency-name: "*"
+      update-types:
+        - "version-update:semver-major"
+        - "version-update:semver-minor"

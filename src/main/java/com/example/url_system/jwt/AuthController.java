@@ -44,6 +44,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
             );
             UserDetails user = (UserDetails) auth.getPrincipal();
+            assert user != null;
             String token = jwt.generateTokenFromUsername(user);
 
             List<String> roles = user.getAuthorities().stream()
