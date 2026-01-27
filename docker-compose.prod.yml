@@ -44,21 +44,21 @@ services:
 
 
   prometheus:
-    container_name: sports_prometheus
+    container_name: url_prometheus
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
     volumes:
-      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
-      - db
+      - backend
     depends_on:
       - app
     restart: unless-stopped
 
 
   grafana:
-    container_name: sports_grafana
+    container_name: url_grafana
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
@@ -66,7 +66,7 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
     networks:
-      - db
+      - backend
     depends_on:
       - prometheus
     restart: unless-stopped

@@ -42,6 +42,8 @@
     ## Obesrvability
     - Spring Boot Actuator 
     - JaCoCo
+    - Micrometer + Prometheus
+    - Grafana
 
     ## CI / CD / Quality
     - Qodana
@@ -64,11 +66,13 @@
             ```bash
             docker compose -f .\docker-compose.prod.yml up -d --build
     
-    ## ACCESS TO
+## ACCESS TO
         1. API: http://localhost:8080
         2. Swagger: http://localhost:8080/swagger-ui.html
         3. Actuator: http://localhost:8080/actuator/health
         4. JaCoCo raports at: Repository -> Actions -> Tests -> Test -> Scroll down
+        5. Grafana: http://localhost:3000/  login: (admin/admin)
+        6. Prometheus: http://localhost:9090/
 
 
 ### REQUIRED .env NAMES (ONLY NEEDED FROM PROD)
