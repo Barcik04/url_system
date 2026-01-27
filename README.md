@@ -90,12 +90,42 @@
 ### AUTHENTICATION
     After successfull register and login, a JWT Bearer Token is issued to the client
     
-    ## Location 
 
 
+### TESTING 
+    Project uses JUnit5, Mockito and Testcontainers to cover diffrent parts of the project.
+    **Mockito** test mostly used to check controller responses correctness.
+    **Integration** tests used for buissness logic at service level.
+    **TestContainers** ensuring correct interaction between all API layers
 
+    ## Location: src/test/java/com/example/sports_management_system
 
+    ## How to run:
+            ```bash
+            .\mvwn clean verify
 
+    ## CI / CD in .github 
+    -- qodana_code_quality.yml: 
+        On every push and pull Code quality analysis is performed using Qodana
+    -- docker-image.yml:
+        On every pull docker image is being built and checked by Trivy which then is pushed to DockerHub
+    -- tests.yml:
+        tests are run and JaCoCo report is being issued
+    -- depandabot.yml:
+        checks vialability of dependencies versions
+
+### ARCHITECTURE
+    The project is a REST API built using a onion architecture
+    
+    The codebase is organized by groups (e.g. services, dtos, controllers), where each contains:
+        -REST Controllers
+        -dtos
+        -exceptions
+        -jwt (Bearer Authentication)
+        -repostiories (JPA data access)
+        -security   
+        -services (buisness logic)
+        - utils (rate-limit, logger)
 
 
 
