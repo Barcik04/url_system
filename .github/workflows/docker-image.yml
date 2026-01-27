@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main", "master" ]
 
+env:
+  IMAGE_NAME: url_system
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -31,33 +34,31 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    env:
-      IMAGE_NAME: url_system
         
         
         
-        
+
         # ---- TRIVY (report-only first, no failing builds yet) ----
-        - name: Trivy scan (SARIF)
-          uses: aquasecurity/trivy-action@0.24.0
-          with:
-            image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            format: sarif
-            output: trivy-results.sarif
-            severity: CRITICAL
-            exit-code: "1"
-            ignore-unfixed: true
+      - name: Trivy scan (SARIF)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
 
-        - name: Upload Trivy SARIF to GitHub Security
-          uses: github/codeql-action/upload-sarif@v3
-          with:
-            sarif_file: trivy-results.sarif
+      - name: Upload Trivy SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
 
-        - name: Trivy scan (table output in logs)
-          uses: aquasecurity/trivy-action@0.24.0
-          with:
-            image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            format: table
-            severity: CRITICAL
-            exit-code: "1"
-            ignore-unfixed: true
+      - name: Trivy scan (table output in logs)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          severity: CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
