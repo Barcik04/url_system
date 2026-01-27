@@ -38,10 +38,14 @@ jobs:
         
         
 
-        # ---- TRIVY (report-only first, no failing builds yet) ----
+        # ---- TRIVY (fail on CRITICAL) ----
       - name: Trivy scan (SARIF)
         uses: aquasecurity/trivy-action@0.24.0
+        env:
+          TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
+          scan-type: image
           image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: sarif
           output: trivy-results.sarif
@@ -56,6 +60,9 @@ jobs:
 
       - name: Trivy scan (table output in logs)
         uses: aquasecurity/trivy-action@0.24.0
+        env:
+          TRIVY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          TRIVY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
           image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: table
