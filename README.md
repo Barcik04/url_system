@@ -64,14 +64,33 @@
             ```bash
             docker compose -f .\docker-compose.prod.yml up -d --build
     
-    ## ACCESS
+    ## ACCESS TO
+        1. API: http://localhost:8080
+        2. Swagger: http://localhost:8080/swagger-ui.html
+        3. Actuator: http://localhost:8080/actuator/health
+        4. JaCoCo raports at: Repository -> Actions -> Tests -> Test -> Scroll down
 
 
+### REQUIRED .env NAMES (ONLY NEEDED FROM PROD)
+    `POSTGRES_DB`:  PostgreSQL database name 
+    `POSTGRES_USER`:  PostgreSQL username
+    `POSTGRES_PASSWORD`:  PostgreSQL password
+    `SPRING_DATASOURCE_URL`:  JDBC connection URL
+    `SPRING_DATASOURCE_USERNAME`:  Database username used by Spring
+    `SPRING_DATASOURCE_PASSWORD`:  Database password used by Spring 
+    
+    --See ../.env.example file and adjust values if needed
 
 
+### DB MIGRATIONS (FLYWAY)
+    - location : ../src/main/resources/db/migration
+    - behavior: Migrations automatically executed after API start
 
 
-
+### AUTHENTICATION
+    After successfull register and login, a JWT Bearer Token is issued to the client
+    
+    ## Location 
 
 
 
