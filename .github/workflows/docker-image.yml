@@ -32,20 +32,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build (and push on push)
+      # ---- BUILD ----
+      - name: Build PR image (load locally)
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: ${{ github.event_name == 'push' }}
-          load: ${{ github.event_name == 'pull_request' }}
+          push: false
+          load: true
           tags: |
             local/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Build & Push image (main/master)
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # ---- TRIVY (fail on CRITICAL) ----
+      # ---- TRIVY (PR ONLY - before merge) ----
       - name: Trivy scan (SARIF)
+        if: github.event_name == 'pull_request'
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: image
@@ -57,12 +69,13 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload Trivy SARIF to GitHub Security
-        if: github.event_name == 'push'
+        if: github.event_name == 'pull_request'
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
 
       - name: Trivy scan (table output in logs)
+        if: github.event_name == 'pull_request'
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: image
