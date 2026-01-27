@@ -29,6 +29,7 @@ public class UrlMapperImpl implements UrlMapper {
         }
 
         return new CreateResponseUrlDto(
+                url.getLongUrl(),
                 url.getCode(),
                 url.getCreatedAt(),
                 url.getExpiresAt()

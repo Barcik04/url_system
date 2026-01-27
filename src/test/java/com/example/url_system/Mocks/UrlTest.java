@@ -7,6 +7,7 @@ import com.example.url_system.jwt.AuthEntryPointJwt;
 import com.example.url_system.jwt.AuthTokenFilter;
 import com.example.url_system.jwt.JwtUtils;
 import com.example.url_system.models.Url;
+import com.example.url_system.models.User;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.security.SecurityConfig;
@@ -18,18 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -124,5 +122,61 @@ class UrlTest {
         verify(urlService, times(1)).getUrlAndRegisterClick("iwa11");
     }
 
+
+
+    @Test
+    @WithMockUser(username = "igor", authorities = {"USER"})
+    void should_return_200_when_get_stats_url() throws Exception {
+        String username = "igor";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/api/v1/stats/" + username))
+                .andExpect(status().isOk());
+
+        verify(userRepository, times(1)).findByUsername(username);
+    }
+
+
+
+
+    @Test
+    @WithMockUser(username = "igor", authorities = {"USER"})
+    void should_return_401_when_user_not_authenticated_and_get_stats_url() throws Exception {
+
+        when(userRepository.findByUsername("igor")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/stats/awd"))
+                .andExpect(status().isUnauthorized());
+
+        verify(userRepository, times(1)).findByUsername("igor");
+        verifyNoInteractions(urlService);
+    }
+
+
+
+
+    @Test
+    @WithMockUser(username = "igor", authorities = {"ADMIN"})
+    void should_return_200_when_get_all_link() throws Exception {
+        mockMvc.perform(get("/api/v1/urls")
+                .param("page", "0")
+                .param("size", "2"))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @WithMockUser(username = "igor", authorities = {"USER"})
+    void should_return_403_when_get_all_link_and_user() throws Exception {
+        mockMvc.perform(get("/api/v1/urls")
+                .param("page", "0")
+                .param("size", "2"))
+                .andExpect(status().isForbidden());
+    }
 }
 

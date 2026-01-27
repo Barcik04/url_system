@@ -1,0 +1,163 @@
+package com.example.url_system.Integration;
+
+import com.example.url_system.dtos.CreateResponseUrlDto;
+import com.example.url_system.dtos.CreateUrlRequest;
+import com.example.url_system.dtos.StatsUrlDto;
+import com.example.url_system.exceptions.UrlExpiredException;
+import com.example.url_system.models.Role;
+import com.example.url_system.models.Url;
+import com.example.url_system.models.User;
+import com.example.url_system.repositories.UrlRepository;
+import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.services.UrlService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.NoSuchElementException;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@SpringBootTest
+@Transactional
+@ActiveProfiles("test")
+public class IntegrationTest {
+    @Autowired private UrlRepository urlRepository;
+    @Autowired private UserRepository userRepository;
+
+    @Autowired private UrlService urlService;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+
+    @BeforeEach
+    void cleanDb() {
+        jdbc.execute("""
+        TRUNCATE TABLE
+            users,
+            urls
+        RESTART IDENTITY CASCADE
+    """);
+    }
+
+
+    @Test
+    @Transactional
+    void createLinkSuccessfully() {
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//:awdjkaiwawdawkod", null);
+
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+
+        assertEquals("https//:awdjkaiwawdawkod", createResponseUrlDto.url());
+    }
+
+
+    @Test
+    void shouldThrow403_whenUrlIsExpired() {
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//:awdjkaiwawkod", Instant.now());
+
+        UrlExpiredException ex = assertThrows(
+                UrlExpiredException.class,
+                () -> urlService.create(createUrlRequest, null)
+        );
+
+        assertEquals("Url expired", ex.getMessage());
+    }
+
+
+    @Test
+    @Transactional
+    void shouldGetUrlAndRegisterClickSuccessfully() {
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
+
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+
+        Url url = urlService.getUrlAndRegisterClick(createResponseUrlDto.shortUrl());
+
+        assertEquals(1, url.getClicks());
+
+        urlService.getUrlAndRegisterClick(createResponseUrlDto.shortUrl());
+
+        assertEquals(2, url.getClicks());
+        assertEquals(url.getLongUrl(), createUrlRequest.longUrl());
+    }
+
+
+
+    @Test
+    @Transactional
+    void shouldGetStatsSuccessfully() {
+        User user = new User("igor", "12345678", Role.USER);
+        userRepository.save(user);
+
+        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
+
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, foundUser.getId());
+
+        StatsUrlDto statsUrlDto = urlService.getStatsUrl(createResponseUrlDto.shortUrl(), foundUser.getId());
+
+        assertEquals(0, statsUrlDto.clicks());
+        assertEquals(statsUrlDto.code(), createResponseUrlDto.shortUrl());
+    }
+
+
+    @Test
+    @Transactional
+    void shouldThrow404_whenUrlIsNotFound() {
+        User user = new User("igor", "12345678", Role.USER);
+        userRepository.save(user);
+
+        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
+
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+
+        NoSuchElementException ex = assertThrows(
+                NoSuchElementException.class,
+                () -> urlService.getStatsUrl(createResponseUrlDto.shortUrl(), foundUser.getId())
+        );
+
+        assertEquals("Url not found", ex.getMessage());
+    }
+
+
+
+    @Test
+    @Transactional
+    void shouldReturnPagedLinksForUserSuccessfully() {
+        User user = new User("igor", "12345678", Role.USER);
+        userRepository.save(user);
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
+
+        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId());
+
+        Page<StatsUrlDto> urls = urlService.showMyLinks(pageable, foundUser.getId());
+
+        assertEquals(5, urls.getTotalElements());
+        assertTrue(urls.stream().anyMatch(a -> a.longUrl().equals(createUrlRequest.longUrl())));
+    }
+}

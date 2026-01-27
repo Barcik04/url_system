@@ -72,6 +72,8 @@ public class UrlService {
     }
 
 
+
+
     /**
      * Method for generating unique code (shortened url) for url
      *
@@ -134,13 +136,14 @@ public class UrlService {
      * @param userId id of an authenticated user
      * @return {@link StatsUrlDto} dto of stats from found url
      */
+    @Transactional(readOnly = true)
     public StatsUrlDto getStatsUrl(String code, Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
 
         Url url = urlRepository.findByCodeAndUser_Id(code, userId)
-                .orElseThrow(() -> new NoSuchElementException("link not found"));
+                .orElseThrow(() -> new NoSuchElementException("Url not found"));
 
         return urlMapper.urlToStatsDto(url);
     }
@@ -152,6 +155,7 @@ public class UrlService {
      * @param pageable page request
      * @return paged urls
      */
+    @Transactional(readOnly = true)
     public Page<Url> getAllLinks(Pageable pageable) {
         return urlRepository.findAll(pageable);
     }
@@ -164,6 +168,7 @@ public class UrlService {
      * @param userId id of an authenticated user
      * @return {@link StatsUrlDto} dto of stats for each url
      */
+    @Transactional(readOnly = true)
     public Page<StatsUrlDto> showMyLinks(Pageable pageable, Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("user not found"));
