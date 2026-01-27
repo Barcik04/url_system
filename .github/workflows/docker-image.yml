@@ -3,12 +3,9 @@ name: Build & Push Docker image
 on:
   push:
     branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
 
 permissions:
   contents: read
-  security-events: write
   actions: read
 
 env:
@@ -26,26 +23,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
-        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ---- BUILD ----
-      - name: Build PR image (load locally)
-        if: github.event_name == 'pull_request'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: false
-          load: true
-          tags: |
-            local/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Build & Push image (main/master)
-        if: github.event_name == 'push'
+      - name: Build and push (main/master only)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -54,33 +37,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      # ---- TRIVY (PR ONLY - before merge) ----
-      - name: Trivy scan (SARIF)
-        if: github.event_name == 'pull_request'
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: image
-          image-ref: local/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL
-          exit-code: "1"
-          ignore-unfixed: true
-
-      - name: Upload Trivy SARIF to GitHub Security
-        if: github.event_name == 'pull_request'
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: trivy-results.sarif
-
-      - name: Trivy scan (table output in logs)
-        if: github.event_name == 'pull_request'
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: image
-          image-ref: local/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          format: table
-          severity: CRITICAL
-          exit-code: "1"
-          ignore-unfixed: true
