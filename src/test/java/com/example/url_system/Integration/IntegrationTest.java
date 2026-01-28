@@ -162,4 +162,5 @@ public class IntegrationTest {
         assertEquals(5, urls.getTotalElements());
         assertTrue(urls.stream().anyMatch(a -> a.longUrl().equals(createUrlRequest.longUrl())));
     }
+
 }
