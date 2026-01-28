@@ -3,6 +3,7 @@ package com.example.url_system.Integration;
 import com.example.url_system.dtos.CreateResponseUrlDto;
 import com.example.url_system.dtos.CreateUrlRequest;
 import com.example.url_system.dtos.StatsUrlDto;
+import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.UrlExpiredException;
 import com.example.url_system.models.Role;
 import com.example.url_system.models.Url;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -56,7 +58,7 @@ public class IntegrationTest {
     void createLinkSuccessfully() {
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//:awdjkaiwawdawkod", null);
 
-        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null, "lofrk");
 
         assertEquals("https//:awdjkaiwawdawkod", createResponseUrlDto.url());
     }
@@ -68,7 +70,7 @@ public class IntegrationTest {
 
         UrlExpiredException ex = assertThrows(
                 UrlExpiredException.class,
-                () -> urlService.create(createUrlRequest, null)
+                () -> urlService.create(createUrlRequest, null, "bbgbgbg")
         );
 
         assertEquals("Url expired", ex.getMessage());
@@ -80,7 +82,7 @@ public class IntegrationTest {
     void shouldGetUrlAndRegisterClickSuccessfully() {
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
-        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null, "lldoad");
 
         Url url = urlService.getUrlAndRegisterClick(createResponseUrlDto.shortUrl());
 
@@ -104,7 +106,7 @@ public class IntegrationTest {
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
-        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, foundUser.getId());
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, foundUser.getId(), "kkfke");
 
         StatsUrlDto statsUrlDto = urlService.getStatsUrl(createResponseUrlDto.shortUrl(), foundUser.getId());
 
@@ -123,7 +125,7 @@ public class IntegrationTest {
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
-        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null);
+        CreateResponseUrlDto createResponseUrlDto = urlService.create(createUrlRequest, null, "awd222");
 
         NoSuchElementException ex = assertThrows(
                 NoSuchElementException.class,
@@ -148,12 +150,12 @@ public class IntegrationTest {
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
-        urlService.create(createUrlRequest, foundUser.getId());
-        urlService.create(createUrlRequest, foundUser.getId());
-        urlService.create(createUrlRequest, foundUser.getId());
-        urlService.create(createUrlRequest, foundUser.getId());
-        urlService.create(createUrlRequest, foundUser.getId());
-        urlService.create(createUrlRequest, foundUser.getId());
+        urlService.create(createUrlRequest, foundUser.getId(), "qwe");
+        urlService.create(createUrlRequest, foundUser.getId(), "awd");
+        urlService.create(createUrlRequest, foundUser.getId(), "ddd");
+        urlService.create(createUrlRequest, foundUser.getId(), "aw1d");
+        urlService.create(createUrlRequest, foundUser.getId(), "wda");
+        urlService.create(createUrlRequest, foundUser.getId(), "dkkkkw");
 
         Page<StatsUrlDto> urls = urlService.showMyLinks(pageable, foundUser.getId());
 

@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -101,6 +102,7 @@ class UrlTest {
 
 
         mockMvc.perform(post("/api/v1/urls")
+                        .header("Idempotency-Key", "123dak")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createUrlRequest)))
                 .andExpect(status().isCreated());
@@ -177,6 +179,18 @@ class UrlTest {
                 .param("page", "0")
                 .param("size", "2"))
                 .andExpect(status().isForbidden());
+    }
+
+
+    @Test
+    void should_throw_400_when_missing_idempotency_key() throws Exception {
+        var createUrlRequest = new CreateUrlRequest("https://...", null);
+
+        mockMvc.perform(post("/api/v1/urls")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createUrlRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Missing Idempotency-Key")));
     }
 }
 

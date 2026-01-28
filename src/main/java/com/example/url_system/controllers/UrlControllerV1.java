@@ -65,15 +65,28 @@ public class UrlControllerV1 {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Missing Idempotency-Key",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiError.class))
             )
     })
     @PostMapping("/api/v1/urls")
     public ResponseEntity<CreateResponseUrlDto> create(
             @Valid @RequestBody CreateUrlRequest  createUrlRequest,
-            @AuthenticationPrincipal UserDetails principal
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestHeader("Idempotency-Key") String idempotencyKey
     ) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing Idempotency-Key");
+        }
+
+
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(urlService.create(createUrlRequest,  null));
+            return ResponseEntity.status(HttpStatus.CREATED).body(urlService.create(createUrlRequest,  null, idempotencyKey));
         }
 
         String username = principal.getUsername();
@@ -81,7 +94,7 @@ public class UrlControllerV1 {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
                 .getId();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(urlService.create(createUrlRequest,  userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(urlService.create(createUrlRequest,  userId, idempotencyKey));
     }
 
 
