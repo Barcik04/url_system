@@ -23,10 +23,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+
     private final AuthenticationManager authManager;
     private final JwtUtils jwt;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+
 
     public AuthController(AuthenticationManager authManager, JwtUtils jwt, UserRepository userRepo, PasswordEncoder passwordEncoder) {
         this.authManager = authManager;

@@ -4,8 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -230,4 +234,106 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
+
+
+    @ExceptionHandler(CannotGetJdbcConnectionException.class)
+    public ResponseEntity<ApiError> handleCannotGetJdbcConnection(
+            CannotGetJdbcConnectionException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                "Database unavailable",
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.error("Cannot reach the Database{} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(apiError);
+    }
+
+
+
+
+    @ExceptionHandler(DataAccessResourceFailureException.class)
+    public ResponseEntity<ApiError> handleDataAccessResourceFailure(
+            DataAccessResourceFailureException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                "DB_UNAVAILABLE",
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.error("Db unavailable{} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(apiError);
+    }
+
+
+
+    @ExceptionHandler(CannotAcquireLockException.class)
+    public ResponseEntity<ApiError> handleCannotAcquireLock(
+            CannotAcquireLockException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                "Database lock conflict",
+                HttpStatus.CONFLICT.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.error("Database lock conflict {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
+
+
+    @ExceptionHandler(QueryTimeoutException.class)
+    public ResponseEntity<ApiError> handleQueryTimeout(
+            QueryTimeoutException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                "Database timeout",
+                HttpStatus.GATEWAY_TIMEOUT.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.error("Database timeout {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return  ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(apiError);
+    }
+
+
+    @ExceptionHandler(org.hibernate.QueryTimeoutException.class)
+    public ResponseEntity<ApiError> handleQueryTimeoutHibernate(
+            QueryTimeoutException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                "Database timeout",
+                HttpStatus.GATEWAY_TIMEOUT.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.error("Database timeout hibernate {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return  ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(apiError);
+    }
+
+
+
+
 }

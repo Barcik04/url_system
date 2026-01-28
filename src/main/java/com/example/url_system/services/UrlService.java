@@ -1,6 +1,8 @@
 package com.example.url_system.services;
 
 import com.example.url_system.dtos.*;
+import com.example.url_system.exceptions.ApiError;
+import com.example.url_system.exceptions.ApiResponse;
 import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.UrlExpiredException;
 import com.example.url_system.models.IdempotencyKeys;
@@ -10,6 +12,11 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -54,6 +62,7 @@ public class UrlService {
      * @param idempotencyKey idempotency key from client.
      * @return {@link CreateResponseUrlDto} dto with created url data
      */
+    @CircuitBreaker(name = "baseService")
     @Transactional
     public CreateResponseUrlDto create(CreateUrlRequest createUrlRequest, Long userId, String idempotencyKey) {
         IdempotencyKeys idem;
@@ -151,6 +160,8 @@ public class UrlService {
      * @param code shortened link we want to look for
      * @return Retrieved url
      */
+    @CircuitBreaker(name = "baseService")
+    @Retry(name = "baseService")
     @Transactional
     public Url getUrlAndRegisterClick(String code) {
         Url url = urlRepository.findByCode(code)
@@ -175,6 +186,8 @@ public class UrlService {
      * @param userId id of an authenticated user
      * @return {@link StatsUrlDto} dto of stats from found url
      */
+    @Retry(name = "baseService")
+    @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
     public StatsUrlDto getStatsUrl(String code, Long userId) {
         userRepository.findById(userId)
@@ -194,10 +207,15 @@ public class UrlService {
      * @param pageable page request
      * @return paged urls
      */
+    @Bulkhead(name = "baseService")
+    @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
     public Page<Url> getAllLinks(Pageable pageable) {
         return urlRepository.findAll(pageable);
     }
+
+
+
 
 
     /**
@@ -207,6 +225,8 @@ public class UrlService {
      * @param userId id of an authenticated user
      * @return {@link StatsUrlDto} dto of stats for each url
      */
+    @Bulkhead(name = "baseService")
+    @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
     public Page<StatsUrlDto> showMyLinks(Pageable pageable, Long userId) {
         userRepository.findById(userId)
@@ -216,4 +236,5 @@ public class UrlService {
 
         return urlMapper.urlToStatsPageDto(urls);
     }
+
 }

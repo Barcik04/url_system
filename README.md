@@ -147,6 +147,7 @@
     -- profiles dev-prod-test separation
     -- Mockito, Integration, Testcontainer Tests
     -- Custom Logger implementation with ID
+    -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
 
 
 
