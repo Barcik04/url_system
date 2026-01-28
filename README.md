@@ -133,6 +133,20 @@
 
 
 
+### WHATS IMPLEMENTED
+    -- Rate limiting ip or userId based on Bucket4j
+    -- Actuator + Prometheus + Grafana
+    -- JaCoCo
+    -- Depandabot CI
+    -- Qodana quality and Qoadana Tests
+    -- Docker Image build and Push to DockerHub via GitHub Action workflows
+    -- JWT
+    -- Global Exception Handler
+    -- Idempotency Keys secured
+    -- Flyway Migrations (Tables, Constraints, Indexes)
+    -- profiles dev-prod-test separation
+    -- Mockito, Integration, Testcontainer Tests
+    -- Custom Logger implementation with ID
 
 
 

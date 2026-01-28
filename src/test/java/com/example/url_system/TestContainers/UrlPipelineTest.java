@@ -52,7 +52,8 @@ public class UrlPipelineTest {
                 """;
 
         mockMvc.perform(post("/api/v1/urls")
-                .contentType(MediaType.APPLICATION_JSON)
+                        .header("Idempotency-Key", "wodawk")
+                        .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isCreated());
     }

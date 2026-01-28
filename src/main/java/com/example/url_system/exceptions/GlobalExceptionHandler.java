@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -188,5 +189,45 @@ public class GlobalExceptionHandler {
         log.warn("Acess denied {} {} {} {}", request.getMethod(), request.getRequestURI(), e.getMessage(), apiError.status());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
+
+
+    @ExceptionHandler(ResponseAlreadyBeingProcessed.class)
+    public ResponseEntity<ApiError> handleResponseAlreadyBeingProcessed(
+            ResponseAlreadyBeingProcessed e,
+            HttpServletRequest request
+    ) {
+
+        ApiError apiError = new ApiError(
+                e.getMessage(),
+                HttpStatus.CONFLICT.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.warn("Request already being processed {} {} {} {}", request.getMethod(), request.getRequestURI(), e.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
+
+
+
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiError> handleMissingHeader(MissingRequestHeaderException ex,
+                                                        HttpServletRequest request) {
+        ApiError apiError = new ApiError(
+                "Missing " + ex.getHeaderName(),
+                HttpStatus.BAD_REQUEST.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+
+        log.warn("Missing headers at: {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 }

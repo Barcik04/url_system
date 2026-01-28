@@ -1,15 +1,22 @@
 package com.example.url_system.services;
 
 import com.example.url_system.dtos.*;
+import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.UrlExpiredException;
+import com.example.url_system.models.IdempotencyKeys;
+import com.example.url_system.models.IdempotencyStatus;
 import com.example.url_system.models.Url;
 import com.example.url_system.models.User;
+import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -21,17 +28,21 @@ import java.util.NoSuchElementException;
 public class UrlService {
     private static final String ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final int CODE_LENGTH = 8;
+    private static final String OP_CREATE_URL = "CREATE_URL";
+
 
     private final UrlRepository urlRepository;
     private final UrlMapper urlMapper;
     private final UserRepository userRepository;
+    private final IdempotencyKeyRepository idempotencyKeyRepository;
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
+        this.idempotencyKeyRepository = idempotencyKeyRepository;
     }
 
 
@@ -40,35 +51,63 @@ public class UrlService {
      *
      * @param createUrlRequest {@link CreateUrlRequest} dto to create link
      * @param userId id of an authenticated user
+     * @param idempotencyKey idempotency key from client.
      * @return {@link CreateResponseUrlDto} dto with created url data
      */
     @Transactional
-    public CreateResponseUrlDto create(CreateUrlRequest createUrlRequest, Long userId) {
-        if (userId != null) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NoSuchElementException("User not found"));
-            String code = generateUniqueCode();
+    public CreateResponseUrlDto create(CreateUrlRequest createUrlRequest, Long userId, String idempotencyKey) {
+        IdempotencyKeys idem;
+        boolean isRetry = false;
 
-            if (createUrlRequest.expiredAt() != null && createUrlRequest.expiredAt().isBefore(Instant.now())) {
-                throw new UrlExpiredException("Url expired");
-            }
-
-            Url url = new Url(code, createUrlRequest.longUrl(), createUrlRequest.expiredAt());
-            user.addUrl(url);
-            url.setUser(user);
-
-            return urlMapper.urlToCreateDto(urlRepository.save(url));
+        try {
+            idem = idempotencyKeyRepository.save(
+                    new IdempotencyKeys(OP_CREATE_URL, idempotencyKey)
+            );
+        } catch (DataIntegrityViolationException e) {
+            isRetry = true;
+            idem = idempotencyKeyRepository
+                    .findByOperationAndIdempotencyKey(OP_CREATE_URL, idempotencyKey)
+                    .orElseThrow(() -> new NoSuchElementException("Idempotency Key Not Found"));
         }
 
-        String code = generateUniqueCode();
+        // ---------- RETRY PATH ----------
+        if (isRetry) {
+            if (idem.getIdempotencyStatus() == IdempotencyStatus.COMPLETED) {
+                Url url = urlRepository.findById(idem.getCreatedUrlId())
+                        .orElseThrow(() -> new NoSuchElementException("Url Not Found"));
+                return urlMapper.urlToCreateDto(url);
+            }
 
-        if (createUrlRequest.expiredAt() != null && createUrlRequest.expiredAt().isBefore(Instant.now())) {
+            if (idem.getIdempotencyStatus() == IdempotencyStatus.IN_PROGRESS) {
+                throw new ResponseAlreadyBeingProcessed(
+                        "Request is already being processed"
+                );
+            }
+        }
+
+        // ---------- WINNER PATH ----------
+        if (createUrlRequest.expiredAt() != null &&
+                createUrlRequest.expiredAt().isBefore(Instant.now())) {
             throw new UrlExpiredException("Url expired");
         }
 
+        String code = generateUniqueCode();
         Url url = new Url(code, createUrlRequest.longUrl(), createUrlRequest.expiredAt());
 
-        return urlMapper.urlToCreateDto(urlRepository.save(url));
+
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NoSuchElementException("User not found"));
+            user.addUrl(url);
+            url.setUser(user);
+        }
+
+        Url saved = urlRepository.save(url);
+
+        idem.setCreatedUrlId(saved.getId());
+        idem.setIdempotencyStatus(IdempotencyStatus.COMPLETED);
+
+        return urlMapper.urlToCreateDto(saved);
     }
 
 
