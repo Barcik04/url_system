@@ -165,3 +165,5 @@
     --async Config (limit thread pool)
     --Caching (normal and rate limiting) Redis
     --TEST DO REDISA!!!
+    --AWS deployment
+    --React learning
