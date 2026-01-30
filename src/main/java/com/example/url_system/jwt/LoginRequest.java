@@ -1,6 +1,9 @@
 package com.example.url_system.jwt;
 
+import jakarta.validation.constraints.Email;
+
 public class LoginRequest {
+    @Email(message = "invalid email")
     private String username;
     private String password;
 

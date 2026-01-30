@@ -1,7 +1,9 @@
 package com.example.url_system.exceptions;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.hibernate.AssertionFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.CannotAcquireLockException;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -333,7 +336,21 @@ public class GlobalExceptionHandler {
         return  ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(apiError);
     }
 
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<ApiError> handleTransactionSystemException(
+            TransactionSystemException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
 
+        log.warn("Credentials invalid: {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
 
-
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
 }

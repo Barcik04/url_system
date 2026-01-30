@@ -37,13 +37,13 @@ public class UrlPipelineTest {
     void setup() {
         jdbc.execute("TRUNCATE TABLE urls, users RESTART IDENTITY CASCADE");
 
-        User user = new User("igor", passwordEncoder.encode("12345678"));
+        User user = new User("igor.bb00@gmail.com", passwordEncoder.encode("12345678"));
         userRepository.save(user);
     }
 
 
     @Test
-    @WithUserDetails(value = "igor", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "igor.bb00@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void shouldCreateUrl_endToEnd() throws Exception {
         String json = """
                 {

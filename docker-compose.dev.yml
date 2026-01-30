@@ -14,8 +14,27 @@ services:
     networks:
       - backend
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
+    networks:
+      - backend
+    restart: unless-stopped
+
+
+
+
+
+
+
 volumes:
   db_dev_data:
+  redis_data:
 
 networks:
   backend:

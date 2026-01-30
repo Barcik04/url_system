@@ -72,6 +72,14 @@ public class UrlControllerV1 {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ApiError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Request is already being processed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiError.class)
+                    )
             )
     })
     @PostMapping("/api/v1/urls")
@@ -100,7 +108,7 @@ public class UrlControllerV1 {
 
 
 
-    @Operation(summary = "Retrieving and redirecting by found code",tags = {"register and click"})
+    @Operation(summary = "Retrieving and redirecting by found code and register click",tags = {"register and click"})
     @ApiResponses({
             @ApiResponse(
                     responseCode = "302",
