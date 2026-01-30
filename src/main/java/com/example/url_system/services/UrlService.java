@@ -12,9 +12,11 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.utils.redis.RedisCacheClient;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import org.hibernate.AssertionFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -43,14 +46,17 @@ public class UrlService {
     private final UrlMapper urlMapper;
     private final UserRepository userRepository;
     private final IdempotencyKeyRepository idempotencyKeyRepository;
+    private final RedisCacheClient redisCacheClient;
+
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
         this.idempotencyKeyRepository = idempotencyKeyRepository;
+        this.redisCacheClient = redisCacheClient;
     }
 
 
@@ -72,7 +78,7 @@ public class UrlService {
             idem = idempotencyKeyRepository.save(
                     new IdempotencyKeys(OP_CREATE_URL, idempotencyKey)
             );
-        } catch (DataIntegrityViolationException e) {
+        } catch (AssertionFailure | DataIntegrityViolationException e) {
             isRetry = true;
             idem = idempotencyKeyRepository
                     .findByOperationAndIdempotencyKey(OP_CREATE_URL, idempotencyKey)
@@ -190,14 +196,24 @@ public class UrlService {
     @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
     public StatsUrlDto getStatsUrl(String code, Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        String cacheKey = "stats:user:" + userId + ":code:" + code;
+
+        return redisCacheClient.get(cacheKey, StatsUrlDto.class)
+                        .orElseGet(() -> {
+                            userRepository.findById(userId)
+                                    .orElseThrow(() -> new NoSuchElementException("User not found"));
 
 
-        Url url = urlRepository.findByCodeAndUser_Id(code, userId)
-                .orElseThrow(() -> new NoSuchElementException("Url not found"));
+                            Url url = urlRepository.findByCodeAndUser_Id(code, userId)
+                                    .orElseThrow(() -> new NoSuchElementException("Url not found"));
 
-        return urlMapper.urlToStatsDto(url);
+                            StatsUrlDto dto = urlMapper.urlToStatsDto(url);
+
+                            redisCacheClient.set(cacheKey, dto, Duration.ofSeconds(30));
+
+                            return dto;
+                        });
     }
 
 

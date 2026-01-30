@@ -2,6 +2,7 @@ package com.example.url_system.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -19,6 +20,7 @@ public class User {
 
     @Column(unique = true, length = 100, nullable = false)
     @NotBlank(message = "username cant be blank")
+    @Email(message = "invalid email")
     private String username;
 
     @Column(nullable = false)

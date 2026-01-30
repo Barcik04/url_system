@@ -99,10 +99,10 @@ public class IntegrationTest {
     @Test
     @Transactional
     void shouldGetStatsSuccessfully() {
-        User user = new User("igor", "12345678", Role.USER);
+        User user = new User("igor.bb00@gmail.com", "12345678", Role.USER);
         userRepository.save(user);
 
-        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+        User foundUser = userRepository.findByUsername("igor.bb00@gmail.com").orElseThrow();
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
@@ -118,10 +118,10 @@ public class IntegrationTest {
     @Test
     @Transactional
     void shouldThrow404_whenUrlIsNotFound() {
-        User user = new User("igor", "12345678", Role.USER);
+        User user = new User("igor.bb010@gmail.com", "12345678", Role.USER);
         userRepository.save(user);
 
-        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+        User foundUser = userRepository.findByUsername("igor.bb010@gmail.com").orElseThrow();
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
@@ -140,12 +140,12 @@ public class IntegrationTest {
     @Test
     @Transactional
     void shouldReturnPagedLinksForUserSuccessfully() {
-        User user = new User("igor", "12345678", Role.USER);
+        User user = new User("igor.b4b00@gmail.com", "12345678", Role.USER);
         userRepository.save(user);
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        User foundUser = userRepository.findByUsername("igor").orElseThrow();
+        User foundUser = userRepository.findByUsername("igor.b4b00@gmail.com").orElseThrow();
 
 
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);

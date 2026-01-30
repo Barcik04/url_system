@@ -148,6 +148,7 @@
     -- Mockito, Integration, Testcontainer Tests
     -- Custom Logger implementation with ID
     -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
+    --Redis caching
 
 
 
@@ -156,3 +157,11 @@
 
 
 
+
+
+## WHAT TO DO 
+    --scheduled method with async email sender
+    --Kafka (outbox etc.)
+    --async Config (limit thread pool)
+    --Caching (normal and rate limiting) Redis
+    --TEST DO REDISA!!!
