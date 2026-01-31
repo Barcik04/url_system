@@ -186,7 +186,7 @@ public class UrlService {
 
 
     /**
-     * Method for displaying stats of particular code linked to user
+     * Method for displaying stats of particular code linked to user. Redis cache used TTL 30 seconds
      *
      * @param code shortened url we want to look for
      * @param userId id of an authenticated user

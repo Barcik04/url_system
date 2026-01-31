@@ -164,4 +164,7 @@
     --Kafka (outbox etc.)
     --async Config (limit thread pool)
     --Caching (normal and rate limiting) Redis
-    --TEST DO REDISA!!!
+
+    --Scheduled on:
+        -emails
+    --Url rankings with redis

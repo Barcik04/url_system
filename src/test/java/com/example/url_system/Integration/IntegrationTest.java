@@ -3,27 +3,29 @@ package com.example.url_system.Integration;
 import com.example.url_system.dtos.CreateResponseUrlDto;
 import com.example.url_system.dtos.CreateUrlRequest;
 import com.example.url_system.dtos.StatsUrlDto;
-import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.UrlExpiredException;
 import com.example.url_system.models.Role;
 import com.example.url_system.models.Url;
 import com.example.url_system.models.User;
+import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.services.IdempotencyKeyService;
 import com.example.url_system.services.UrlService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+
+import java.time.*;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,11 +37,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IntegrationTest {
     @Autowired private UrlRepository urlRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private IdempotencyKeyRepository idempotencyKeyRepository;
 
     @Autowired private UrlService urlService;
+    @Autowired private IdempotencyKeyService idempotencyKeyService;
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @MockitoBean
+    private Clock clock;
 
 
     @BeforeEach
@@ -47,7 +54,8 @@ public class IntegrationTest {
         jdbc.execute("""
         TRUNCATE TABLE
             users,
-            urls
+            urls,
+            idempotency_keys
         RESTART IDENTITY CASCADE
     """);
     }
@@ -161,6 +169,30 @@ public class IntegrationTest {
 
         assertEquals(5, urls.getTotalElements());
         assertTrue(urls.stream().anyMatch(a -> a.longUrl().equals(createUrlRequest.longUrl())));
+    }
+
+
+    @Test
+    void shouldReturnCachedValue_whenDisplayingStats() {
+        User user = new User("igor.b4b00@gmail.com", "12345678", Role.USER);
+        userRepository.save(user);
+
+        User foundUser = userRepository.findByUsername("igor.b4b00@gmail.com").orElseThrow();
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
+
+        CreateResponseUrlDto url = urlService.create(createUrlRequest, foundUser.getId(), "123");
+
+        StatsUrlDto statsUrlDto = urlService.getStatsUrl(url.shortUrl(),  foundUser.getId());
+
+        Url repoUrl = urlRepository.findByCode(statsUrlDto.code()).orElseThrow();
+
+        repoUrl.setLongUrl("123lololololol");
+        urlRepository.save(repoUrl);
+
+        StatsUrlDto redisUrl = urlService.getStatsUrl(url.shortUrl(), foundUser.getId());
+
+        assertEquals(statsUrlDto.code(), redisUrl.code());
     }
 
 }
