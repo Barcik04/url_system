@@ -1,10 +1,12 @@
 package com.example.url_system.utils.scheduling;
 
 import com.example.url_system.utils.emailSender.SmtpEmailSender;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("prod")
 public class ScheduledEmailJob {
 
     private final SmtpEmailSender emailSender;

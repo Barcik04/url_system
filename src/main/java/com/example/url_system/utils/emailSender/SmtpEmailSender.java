@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("!test")
+@Profile("prod")
 public class SmtpEmailSender {
 
     private final JavaMailSender mailSender;
@@ -16,7 +16,7 @@ public class SmtpEmailSender {
         this.mailSender = mailSender;
     }
 
-    @Async
+    @Async("emailExecutor")
     public void send(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);

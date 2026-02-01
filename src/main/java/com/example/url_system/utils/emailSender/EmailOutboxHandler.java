@@ -30,7 +30,7 @@
 //
 //    @Override public String eventType() { return "EMAIL_SEND_REQUESTED"; }
 //
-//    @Async("emailExecutor")
+//    @Async("executor")
 //    @Transactional
 //    public void handle(Long outboxId) {
 //        OutboxEvent e = repo.findById(outboxId).orElseThrow();
