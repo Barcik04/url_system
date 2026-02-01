@@ -45,6 +45,9 @@
     - Micrometer + Prometheus
     - Grafana
 
+    ##Messaging
+    -Kafka
+
     ## CI / CD / Quality
     - Qodana
     - Github Actions
@@ -73,6 +76,7 @@
         4. JaCoCo raports at: Repository -> Actions -> Tests -> Test -> Scroll down
         5. Grafana: http://localhost:3000/  login: (admin/admin)
         6. Prometheus: http://localhost:9090/
+        7. Kafka UI: http://localhost:8085/
 
 
 ### REQUIRED .env NAMES (ONLY NEEDED FROM PROD)
@@ -129,7 +133,7 @@
         -repostiories (JPA data access)
         -security   
         -services (buisness logic)
-        - utils (rate-limit, logger)
+        - utils (rate-limit, logger, scheduling, redis, configs, emailSender)
 
 
 
@@ -149,6 +153,9 @@
     -- Custom Logger implementation with ID
     -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
     --Redis caching
+    --Async thread pool config
+    --Scheduled email sending on expired urls with Kafka (Async, Outbox)
+    --Kafka (email messaging)
 
 
 
@@ -160,11 +167,9 @@
 
 
 ## WHAT TO DO 
-    --scheduled method with async email sender
-    --Kafka (outbox etc.)
-    --async Config (limit thread pool)
+    --Kafka (send message for login/register with user ip etc.)
     --Caching (normal and rate limiting) Redis
 
-    --Scheduled on:
-        -emails
     --Url rankings with redis
+    --Alerts on grafana when too many errors
+    --Kafka tests integration/pipelines

@@ -125,8 +125,8 @@ public class UrlService {
 
             OutboxPayloadDto outboxPayloadDto = new OutboxPayloadDto(
                     user.getUsername(),
-                    saved.getCode() + "expired",
-                    "One of your urls" + createUrlRequest.longUrl() + " expired " + createUrlRequest.expiredAt()
+                    saved.getCode() + " expired",
+                    "One of your urls: " + createUrlRequest.longUrl() + " expired " + createUrlRequest.expiredAt()
             );
 
             JsonNode jsonPayload = objectMapper.valueToTree(outboxPayloadDto);
