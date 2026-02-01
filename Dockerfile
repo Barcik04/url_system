@@ -22,6 +22,8 @@ RUN ./mvnw -B package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+
+
 # Copy the built artifact from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
