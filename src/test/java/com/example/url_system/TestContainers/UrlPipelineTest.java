@@ -1,6 +1,8 @@
 package com.example.url_system.TestContainers;
 
+import com.example.url_system.utils.emailSender.EmailSender;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.example.url_system.models.User;
 import com.example.url_system.repositories.UserRepository;
@@ -33,9 +35,12 @@ public class UrlPipelineTest {
     @Autowired
     JdbcTemplate jdbc;
 
+    @MockitoBean
+    private EmailSender emailSender;
+
     @BeforeEach
     void setup() {
-        jdbc.execute("TRUNCATE TABLE urls, users RESTART IDENTITY CASCADE");
+        jdbc.execute("TRUNCATE TABLE urls, users, idempotency_keys RESTART IDENTITY CASCADE");
 
         User user = new User("igor.bb00@gmail.com", passwordEncoder.encode("12345678"));
         userRepository.save(user);

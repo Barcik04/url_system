@@ -1,15 +1,12 @@
 package com.example.url_system.services;
 
 import com.example.url_system.dtos.*;
-import com.example.url_system.exceptions.ApiError;
-import com.example.url_system.exceptions.ApiResponse;
+
 import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.UrlExpiredException;
-import com.example.url_system.models.IdempotencyKeys;
-import com.example.url_system.models.IdempotencyStatus;
-import com.example.url_system.models.Url;
-import com.example.url_system.models.User;
+import com.example.url_system.models.*;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
+import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.utils.redis.RedisCacheClient;
@@ -17,21 +14,18 @@ import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.hibernate.AssertionFailure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
+
 import java.util.NoSuchElementException;
 
 
@@ -47,16 +41,20 @@ public class UrlService {
     private final UserRepository userRepository;
     private final IdempotencyKeyRepository idempotencyKeyRepository;
     private final RedisCacheClient redisCacheClient;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
 
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
         this.idempotencyKeyRepository = idempotencyKeyRepository;
         this.redisCacheClient = redisCacheClient;
+        this.outboxEventRepository = outboxEventRepository;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -109,7 +107,6 @@ public class UrlService {
         String code = generateUniqueCode();
         Url url = new Url(code, createUrlRequest.longUrl(), createUrlRequest.expiredAt());
 
-
         if (userId != null) {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new NoSuchElementException("User not found"));
@@ -121,6 +118,27 @@ public class UrlService {
 
         idem.setCreatedUrlId(saved.getId());
         idem.setIdempotencyStatus(IdempotencyStatus.COMPLETED);
+
+        if (userId != null && createUrlRequest.expiredAt() != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+            OutboxPayloadDto outboxPayloadDto = new OutboxPayloadDto(
+                    user.getUsername(),
+                    saved.getCode() + "expired",
+                    "One of your urls" + createUrlRequest.longUrl() + " expired " + createUrlRequest.expiredAt()
+            );
+
+            JsonNode jsonPayload = objectMapper.valueToTree(outboxPayloadDto);
+
+            outboxEventRepository.save(new OutboxEvent(
+                    "EMAIL_SEND_REQUESTED",
+                    jsonPayload,
+                    OutboxEvent.Status.NEW,
+                    null,
+                    createUrlRequest.expiredAt()
+            ));
+        }
 
         return urlMapper.urlToCreateDto(saved);
     }
@@ -186,7 +204,7 @@ public class UrlService {
 
 
     /**
-     * Method for displaying stats of particular code linked to user
+     * Method for displaying stats of particular code linked to user. Redis cache used TTL 30 seconds
      *
      * @param code shortened url we want to look for
      * @param userId id of an authenticated user

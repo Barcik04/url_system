@@ -12,6 +12,7 @@ import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.security.SecurityConfig;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.utils.config.JacksonConfig;
 import com.example.url_system.utils.ratelimit.RateLimitFilter;
 import com.example.url_system.utils.ratelimit.RateLimitService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,24 +21,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import static org.mockito.ArgumentMatchers.any;
 
 
-@Import({SecurityConfig.class,RateLimitFilter.class, RateLimitService.class})
+@Import({SecurityConfig.class,RateLimitFilter.class, RateLimitService.class, JacksonConfig.class})
 @WebMvcTest(controllers = AuthController.class, properties = "ratelimit.enabled=true")
 @ActiveProfiles("test")
 class AuthTest {

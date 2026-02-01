@@ -164,6 +164,7 @@
     --Kafka (outbox etc.)
     --async Config (limit thread pool)
     --Caching (normal and rate limiting) Redis
-    --TEST DO REDISA!!!
-    --AWS deployment
-    --React learning
+
+    --Scheduled on:
+        -emails
+    --Url rankings with redis

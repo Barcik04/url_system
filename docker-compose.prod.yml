@@ -21,6 +21,8 @@ services:
       retries: 10
 
   app:
+    env_file:
+      - .env
     container_name: url_system_app
     build:
       context: .
@@ -85,6 +87,7 @@ services:
     networks:
       - backend
     restart: unless-stopped
+
 
 
 
