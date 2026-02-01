@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("prod")
-public class SmtpEmailSender {
+public class SmtpEmailSender implements EmailSender{
 
     private final JavaMailSender mailSender;
 
@@ -16,7 +16,6 @@ public class SmtpEmailSender {
         this.mailSender = mailSender;
     }
 
-    @Async("emailExecutor")
     public void send(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);

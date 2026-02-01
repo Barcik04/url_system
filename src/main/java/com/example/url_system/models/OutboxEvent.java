@@ -1,6 +1,9 @@
 package com.example.url_system.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
 
@@ -15,7 +18,8 @@ public class OutboxEvent {
     private String eventType;
 
     @Column(nullable = false, columnDefinition = "jsonb")
-    private String payload;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JsonNode payload;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,11 +44,12 @@ public class OutboxEvent {
     public OutboxEvent() {
     }
 
-    public OutboxEvent(String eventType, String payload, Status status, String lastError) {
+    public OutboxEvent(String eventType, JsonNode payload, Status status, String lastError, Instant nextAttemptAt) {
         this.eventType = eventType;
         this.payload = payload;
         this.status = status;
         this.lastError = lastError;
+        this.nextAttemptAt = nextAttemptAt;
     }
 
     public long getId() {
@@ -63,11 +68,11 @@ public class OutboxEvent {
         this.eventType = eventType;
     }
 
-    public String getPayload() {
+    public JsonNode getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
+    public void setPayload(JsonNode payload) {
         this.payload = payload;
     }
 
