@@ -30,7 +30,6 @@ public class OutboxDispatcher {
 
     @Scheduled(fixedDelayString = "PT40S")
     public void tick() {
-        log.info("Starting schedule email fetch process");
         List<Long> ids = claimBatch(50);
         for (Long id : ids) {
             OutboxEvent e = repo.findById(id).orElseThrow();
@@ -50,13 +49,9 @@ public class OutboxDispatcher {
         Instant now = Instant.now(clock);
 
         List<OutboxEvent> due = repo.findDueForUpdateSkipLocked(now, limit);
-        if (!due.isEmpty()) {
-            log.info("fuond outbox expired events {}", due);
-        }
         for (OutboxEvent e : due) {
             e.setStatus(OutboxEvent.Status.PROCESSING);
             e.setAttempts(e.getAttempts() + 1);
-            log.info("processing event {}", e);
             repo.save(e);
         }
         return due.stream().map(OutboxEvent::getId).toList();

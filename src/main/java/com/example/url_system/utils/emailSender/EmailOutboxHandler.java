@@ -47,7 +47,6 @@ public class EmailOutboxHandler implements OutboxHandler {
 
             e.setStatus(OutboxEvent.Status.DONE);
             e.setLastError(null);
-            log.info("email sent");
 
         } catch (Exception ex) {
             e.setStatus(e.getAttempts() >= 10 ? OutboxEvent.Status.DEAD : OutboxEvent.Status.FAILED);
