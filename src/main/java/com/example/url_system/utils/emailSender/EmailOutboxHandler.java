@@ -5,7 +5,7 @@ import com.example.url_system.repositories.OutboxEventRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Clock;
 import java.time.Instant;
