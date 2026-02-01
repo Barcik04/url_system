@@ -28,7 +28,6 @@ public class OutboxEvent {
     @Column(nullable = false)
     private int attempts = 0;
 
-    @Column(nullable = false)
     private Instant nextAttemptAt = Instant.EPOCH;
 
     @Column(columnDefinition = "text")
