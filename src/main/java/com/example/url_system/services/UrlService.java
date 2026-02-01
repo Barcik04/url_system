@@ -124,11 +124,9 @@ public class UrlService {
                     .orElseThrow(() -> new NoSuchElementException("User not found"));
 
             OutboxPayloadDto outboxPayloadDto = new OutboxPayloadDto(
-                    saved.getId(),
-                    userId,
                     user.getUsername(),
-                    saved.getCode(),
-                    createUrlRequest.expiredAt()
+                    saved.getCode() + "expired",
+                    "One of your urls" + createUrlRequest.longUrl() + " expired " + createUrlRequest.expiredAt()
             );
 
             JsonNode jsonPayload = objectMapper.valueToTree(outboxPayloadDto);

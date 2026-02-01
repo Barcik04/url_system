@@ -3,6 +3,7 @@ package com.example.url_system.Integration;
 import com.example.url_system.models.IdempotencyKeys;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.services.IdempotencyKeyService;
+import com.example.url_system.utils.emailSender.EmailSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -36,7 +37,8 @@ class IdempotencyKeyCleanupTest {
     @MockitoBean
     private Clock clock;
 
-
+    @MockitoBean
+    private EmailSender emailSender;
 
 
     @BeforeEach

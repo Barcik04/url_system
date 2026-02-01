@@ -12,6 +12,7 @@ import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.IdempotencyKeyService;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.utils.emailSender.EmailSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,9 @@ public class IntegrationTest {
 
     @MockitoBean
     private Clock clock;
+
+    @MockitoBean
+    private EmailSender emailSender;
 
 
     @BeforeEach

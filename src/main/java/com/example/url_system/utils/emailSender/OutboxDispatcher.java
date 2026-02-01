@@ -2,6 +2,8 @@ package com.example.url_system.utils.emailSender;
 
 import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.repositories.OutboxEventRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,7 @@ import java.util.Map;
 @Service
 public class OutboxDispatcher {
 
+    private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
     private final OutboxEventRepository repo;
     private final Clock clock;
     private final Map<String, OutboxHandler> handlersByType;
@@ -25,8 +28,9 @@ public class OutboxDispatcher {
                 .collect(java.util.stream.Collectors.toMap(OutboxHandler::eventType, h -> h));
     }
 
-    @Scheduled(fixedDelayString = "PT2S")
+    @Scheduled(fixedDelayString = "PT40S")
     public void tick() {
+        log.info("Starting schedule email fetch process");
         List<Long> ids = claimBatch(50);
         for (Long id : ids) {
             OutboxEvent e = repo.findById(id).orElseThrow();
@@ -46,9 +50,14 @@ public class OutboxDispatcher {
         Instant now = Instant.now(clock);
 
         List<OutboxEvent> due = repo.findDueForUpdateSkipLocked(now, limit);
+        if (!due.isEmpty()) {
+            log.info("fuond outbox expired events {}", due);
+        }
         for (OutboxEvent e : due) {
             e.setStatus(OutboxEvent.Status.PROCESSING);
             e.setAttempts(e.getAttempts() + 1);
+            log.info("processing event {}", e);
+            repo.save(e);
         }
         return due.stream().map(OutboxEvent::getId).toList();
     }

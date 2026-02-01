@@ -2,6 +2,8 @@ package com.example.url_system.utils.emailSender;
 
 import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.repositories.OutboxEventRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import java.time.Instant;
 @Service
 public class EmailOutboxHandler implements OutboxHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailOutboxHandler.class);
     private final OutboxEventRepository repo;
     private final ObjectMapper objectMapper;
     private final EmailSender emailSender;
@@ -44,6 +47,7 @@ public class EmailOutboxHandler implements OutboxHandler {
 
             e.setStatus(OutboxEvent.Status.DONE);
             e.setLastError(null);
+            log.info("email sent");
 
         } catch (Exception ex) {
             e.setStatus(e.getAttempts() >= 10 ? OutboxEvent.Status.DEAD : OutboxEvent.Status.FAILED);
