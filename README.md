@@ -172,4 +172,3 @@
 
     --Url rankings with redis
     --Alerts on grafana when too many errors
-    --Kafka tests integration/pipelines

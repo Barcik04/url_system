@@ -8,6 +8,7 @@ import com.example.url_system.jwt.AuthTokenFilter;
 import com.example.url_system.jwt.JwtUtils;
 import com.example.url_system.models.Url;
 import com.example.url_system.models.User;
+import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.security.SecurityConfig;
@@ -57,6 +58,8 @@ class AuthTest {
     AuthEntryPointJwt authEntryPointJwt;
     @MockitoBean
     AuthTokenFilter authTokenFilter;
+    @MockitoBean
+    OutboxEventRepository outboxEventRepository;
 
 
     @MockitoBean

@@ -2,6 +2,7 @@ package com.example.url_system.jwt;
 
 import com.example.url_system.models.Role;
 import com.example.url_system.models.User;
+import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,13 +30,15 @@ public class AuthController {
     private final JwtUtils jwt;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final OutboxEventRepository outboxEventRepository;
 
 
-    public AuthController(AuthenticationManager authManager, JwtUtils jwt, UserRepository userRepo, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager authManager, JwtUtils jwt, UserRepository userRepo, PasswordEncoder passwordEncoder, OutboxEventRepository outboxEventRepository) {
         this.authManager = authManager;
         this.jwt = jwt;
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.outboxEventRepository = outboxEventRepository;
     }
 
 

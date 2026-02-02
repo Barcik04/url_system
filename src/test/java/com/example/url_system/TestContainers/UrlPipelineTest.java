@@ -40,7 +40,7 @@ public class UrlPipelineTest {
 
     @BeforeEach
     void setup() {
-        jdbc.execute("TRUNCATE TABLE urls, users, idempotency_keys RESTART IDENTITY CASCADE");
+        jdbc.execute("TRUNCATE TABLE urls, users, idempotency_keys, outbox_events RESTART IDENTITY CASCADE");
 
         User user = new User("igor.bb00@gmail.com", passwordEncoder.encode("12345678"));
         userRepository.save(user);
@@ -61,5 +61,7 @@ public class UrlPipelineTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isCreated());
+
+
     }
 }
