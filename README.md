@@ -153,11 +153,12 @@
     -- Mockito, Integration, Testcontainer Tests
     -- Custom Logger implementation with ID
     -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
-    --Redis caching
-    --Async thread pool config
-    --Scheduled email sending on expired urls with Kafka (Async, Outbox)
-    --Kafka (email messaging)
-    --Dynamic filtering 
+    -- Redis caching
+    -- Async thread pool config
+    -- Scheduled email sending on expired urls with Kafka (Async, Outbox)
+    -- Kafka (email messaging)
+    -- Dynamic filtering 
+    -- Grafana Alerts
 
 
 
@@ -169,5 +170,3 @@
 
 
 ## WHAT TO DO
-    --Url rankings with redis
-    --Alerts on grafana when too many errors
