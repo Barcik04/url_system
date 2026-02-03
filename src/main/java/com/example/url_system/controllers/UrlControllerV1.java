@@ -7,6 +7,7 @@ import com.example.url_system.exceptions.ApiError;
 import com.example.url_system.models.Url;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.utils.dynamicFiltering.UrlFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -199,7 +200,8 @@ public class UrlControllerV1 {
     @PreAuthorize("hasAuthority('USER')")
     public Page<StatsUrlDto> getMyLinks(
             @PageableDefault(size = 20) Pageable pageable,
-            @AuthenticationPrincipal UserDetails principal
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestBody UrlFilter filter
     ) {
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -216,6 +218,6 @@ public class UrlControllerV1 {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
                 .getId();
 
-        return urlService.showMyLinks(safePageable, userId);
+        return urlService.showMyLinks(safePageable, userId, filter);
     }
 }

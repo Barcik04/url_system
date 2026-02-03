@@ -9,6 +9,8 @@ import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.utils.dynamicFiltering.UrlFilter;
+import com.example.url_system.utils.dynamicFiltering.UrlSpecs;
 import com.example.url_system.utils.redis.RedisCacheClient;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -16,17 +18,22 @@ import io.github.resilience4j.retry.annotation.Retry;
 import org.hibernate.AssertionFailure;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 
 @Service
@@ -43,11 +50,12 @@ public class UrlService {
     private final RedisCacheClient redisCacheClient;
     private final OutboxEventRepository outboxEventRepository;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
 
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, Clock clock) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
@@ -55,6 +63,7 @@ public class UrlService {
         this.redisCacheClient = redisCacheClient;
         this.outboxEventRepository = outboxEventRepository;
         this.objectMapper = objectMapper;
+        this.clock = clock;
     }
 
 
@@ -262,13 +271,43 @@ public class UrlService {
     @Bulkhead(name = "baseService")
     @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
-    public Page<StatsUrlDto> showMyLinks(Pageable pageable, Long userId) {
+    public Page<StatsUrlDto> showMyLinks(Pageable pageable, Long userId, UrlFilter filter) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("user not found"));
 
-        Page<Url> urls = urlRepository.findAllByUser_Id(userId, pageable);
+        if (filter == null) {
+            return urlMapper.urlToStatsPageDto(urlRepository.findAllByUser_Id(userId, pageable));
+        }
+
+        Specification<Url> spec = Specification.where(UrlSpecs.belongsToUser(userId));
+
+        Specification<Url> text = UrlSpecs.textSearch(filter.q());
+        if (text != null) {
+            spec = spec.and(text);
+        }
+
+        Specification<Url> exp = UrlSpecs.expired(filter.expired(), clock);
+        if (exp != null) {
+            spec = spec.and(exp);
+        }
+
+
+        Pageable safePageable = sanitizeSort(pageable);
+        Page<Url> urls = urlRepository.findAll(spec, safePageable);
 
         return urlMapper.urlToStatsPageDto(urls);
     }
+
+
+    private Pageable sanitizeSort(Pageable pageable) {
+        var allowed = Set.of("clicks", "expiresAt", "createdAt");
+
+        var orders = pageable.getSort().stream()
+                .filter(o -> allowed.contains(o.getProperty()))
+                .toList();
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+    }
+
 
 }

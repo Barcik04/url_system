@@ -27,7 +27,22 @@ public class EmailKafkaConsumer {
         try {
             EmailPayload p = objectMapper.readValue(payloadJson, EmailPayload.class);
             emailSender.send(p.toEmail(), p.subject(), p.body());
-            log.info("Email sent to {}", p.toEmail());
+            log.info("url expiration email sent to {}", p.toEmail());
+        } catch (Exception ex) {
+            log.error("Email consumer failed: {}", ex.toString());
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @KafkaListener(
+            topics = "signin.fail",
+            groupId = "signin-service"
+    )
+    public void consumeFail(String payloadJson) {
+        try {
+            EmailPayload p = objectMapper.readValue(payloadJson, EmailPayload.class);
+            emailSender.send(p.toEmail(), p.subject(), p.body());
+            log.info("Signin failure email sent to {}", p.toEmail());
         } catch (Exception ex) {
             log.error("Email consumer failed: {}", ex.toString());
             throw new RuntimeException(ex);

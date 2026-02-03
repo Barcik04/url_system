@@ -27,6 +27,7 @@
     - Spring Security
     - Bucket4j (rate Limiting)
     - Jwt security 
+    - Redis
     
     ## Validation & API
     - Spring Validation
@@ -138,7 +139,7 @@
 
 
 ### WHATS IMPLEMENTED
-    -- Rate limiting ip or userId based on Bucket4j
+    -- Rate limiting ip or userId based on Redis 
     -- Actuator + Prometheus + Grafana
     -- JaCoCo
     -- Depandabot CI
@@ -156,6 +157,7 @@
     --Async thread pool config
     --Scheduled email sending on expired urls with Kafka (Async, Outbox)
     --Kafka (email messaging)
+    --Dynamic filtering 
 
 
 
@@ -166,10 +168,6 @@
 
 
 
-## WHAT TO DO 
-    --Kafka (send message for login/register with user ip etc.)
-    --Caching (normal and rate limiting) Redis
-
+## WHAT TO DO
     --Url rankings with redis
     --Alerts on grafana when too many errors
-    --Kafka tests integration/pipelines

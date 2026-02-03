@@ -2,6 +2,7 @@ package com.example.url_system.repositories;
 
 import com.example.url_system.models.OutboxEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,5 +21,13 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> 
         """, nativeQuery = true)
     List<OutboxEvent> findDueForUpdateSkipLocked(@Param("now") Instant now,
                                                  @Param("limit") int limit);
+
+
+    @Modifying
+    @Query(value = """
+        DELETE FROM outbox_events
+        WHERE status = 'DONE'
+        """, nativeQuery = true)
+    void deleteOnStatusDone();
 }
 

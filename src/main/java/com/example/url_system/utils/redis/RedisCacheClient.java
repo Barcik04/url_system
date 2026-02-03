@@ -33,4 +33,18 @@ public class RedisCacheClient {
             redis.opsForValue().set(key, mapper.writeValueAsString(value), ttl);
         } catch (Exception ignored) {}
     }
+
+
+    public int incrementAndGet(String key, Duration ttl) {
+        Long value = redis.opsForValue().increment(key);
+        if (value != null && value == 1) {
+            redis.expire(key, ttl);
+        }
+        return value != null ? value.intValue() : 0;
+    }
+
+    public boolean exists(String key) {
+        Boolean ok = redis.hasKey(key);
+        return ok != null && ok;
+    }
 }
