@@ -2,6 +2,8 @@ package com.example.url_system.TestContainers;
 
 import com.example.url_system.utils.emailSender.EmailSender;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.example.url_system.models.User;
@@ -16,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Testcontainers
 public class UrlPipelineTest {
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -37,6 +43,25 @@ public class UrlPipelineTest {
 
     @MockitoBean
     private EmailSender emailSender;
+
+
+
+    @Container
+    static final GenericContainer<?> redis =
+            new GenericContainer<>("redis:7-alpine").withExposedPorts(6379);
+
+    static {
+        redis.start();
+    }
+
+    @DynamicPropertySource
+    static void redisProps(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+
+        registry.add("spring.redis.host", redis::getHost);
+        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
+    }
 
     @BeforeEach
     void setup() {
