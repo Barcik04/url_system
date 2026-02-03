@@ -12,6 +12,7 @@ import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.IdempotencyKeyService;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.utils.dynamicFiltering.UrlFilter;
 import com.example.url_system.utils.emailSender.EmailSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,9 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.*;
+import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -159,7 +164,7 @@ public class IntegrationTest {
 
         User foundUser = userRepository.findByUsername("igor.b4b00@gmail.com").orElseThrow();
 
-
+        UrlFilter urlFilter = new UrlFilter(null, null);
         CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//12312312waawd", null);
 
         urlService.create(createUrlRequest, foundUser.getId(), "qwe");
@@ -169,7 +174,7 @@ public class IntegrationTest {
         urlService.create(createUrlRequest, foundUser.getId(), "wda");
         urlService.create(createUrlRequest, foundUser.getId(), "dkkkkw");
 
-        Page<StatsUrlDto> urls = urlService.showMyLinks(pageable, foundUser.getId());
+        Page<StatsUrlDto> urls = urlService.showMyLinks(pageable, foundUser.getId(), urlFilter);
 
         assertEquals(5, urls.getTotalElements());
         assertTrue(urls.stream().anyMatch(a -> a.longUrl().equals(createUrlRequest.longUrl())));
@@ -197,6 +202,54 @@ public class IntegrationTest {
         StatsUrlDto redisUrl = urlService.getStatsUrl(url.shortUrl(), foundUser.getId());
 
         assertEquals(statsUrlDto.code(), redisUrl.code());
+    }
+
+
+    @Test
+    @Transactional
+    void shouldFilterAndReturnUsersUrlsStats() {
+        User user = new User("igor.b4b00@gmail.com", "12345678", Role.USER);
+        userRepository.save(user);
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        User foundUser = userRepository.findByUsername("igor.b4b00@gmail.com").orElseThrow();
+
+        UrlFilter urlFilter = new UrlFilter("https", false);
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//igoraawd", null);
+        CreateUrlRequest createUrlRequest2 = new CreateUrlRequest("https//12312312waawd", Instant.now().plus(Duration.ofDays(2)));
+        CreateUrlRequest createUrlRequest3 = new CreateUrlRequest("htt//12312312waawd", Instant.now().plus(Duration.ofDays(2)));
+        CreateUrlRequest createUrlRequest4 = new CreateUrlRequest("httpsd", Instant.now().plus(Duration.ofDays(1)));
+
+        Instant fixedInstant = Instant.now().plus(Duration.ofDays(1).plusSeconds(10));
+
+        when(clock.instant()).thenReturn(fixedInstant);
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+
+        urlService.create(createUrlRequest, foundUser.getId(), "qwe");
+        urlService.create(createUrlRequest2, foundUser.getId(), "awd");
+        urlService.create(createUrlRequest2, foundUser.getId(), "ddd");
+        urlService.create(createUrlRequest3, foundUser.getId(), "aw1d");
+        urlService.create(createUrlRequest3, foundUser.getId(), "wda");
+        urlService.create(createUrlRequest4, foundUser.getId(), "dkkkkw");
+
+        Page<StatsUrlDto> urls = urlService.showMyLinks(pageable, foundUser.getId(), urlFilter);
+
+        Set<String> resultUrls = new  HashSet<>(Set.of(
+                "https//igoraawd",
+                "https//12312312waawd"
+        ));
+        assertEquals(3, urls.getTotalElements());
+
+        List<String> longUrls = urls.getContent().stream()
+                .map(StatsUrlDto::longUrl)
+                .toList();
+
+        assertTrue(resultUrls.containsAll(longUrls));
+
+        assertEquals(1, longUrls.stream().filter("https//igoraawd"::equals).count());
+        assertEquals(2, longUrls.stream().filter("https//12312312waawd"::equals).count());
     }
 
 }

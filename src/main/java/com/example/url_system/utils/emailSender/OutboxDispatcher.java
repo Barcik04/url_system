@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class OutboxDispatcher {
@@ -19,6 +19,10 @@ public class OutboxDispatcher {
     private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
 
     private static final String EMAIL_TOPIC = "email.send.requested";
+    private static final Map<String, String> STATUSES = new HashMap(Map.of(
+            "EMAIL_SEND_REQUESTED", "email.send.requested",
+            "SIGNIN_FAIL", "signin.fail"
+    ));
 
     private final OutboxEventRepository repo;
     private final Clock clock;
@@ -67,19 +71,22 @@ public class OutboxDispatcher {
             return;
         }
 
-        if (!"EMAIL_SEND_REQUESTED".equals(e.getEventType())) {
+        if (STATUSES.keySet().stream().noneMatch(a -> a.equals(e.getEventType()))) {
             markDead(id, "Unsupported eventType=" + e.getEventType());
             return;
         }
 
         String payloadJson = e.getPayload().toString();
 
+        String eventTopic = e.getEventType();
+        String topic = STATUSES.get(eventTopic);
+
         try {
             // Wait for kafka ACK
-            kafkaTemplate.send(EMAIL_TOPIC, String.valueOf(e.getId()), payloadJson).get();
+            kafkaTemplate.send(topic, String.valueOf(e.getId()), payloadJson).get();
 
             markDone(id);
-            log.info("Outbox {} published to Kafka topic={}", id, EMAIL_TOPIC);
+            log.info("Outbox {} published to Kafka topic={}", id, topic);
 
         } catch (Exception ex) {
             markFailed(id, ex);

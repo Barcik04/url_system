@@ -1,36 +1,32 @@
 package com.example.url_system.utils.ratelimit;
 
-
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Refill;
-
 import java.time.Duration;
 
 public enum RateLimitPolicy {
 
-    AUTH_LOGIN(
-            Bandwidth.classic(5,
-                    Refill.intervally(5, Duration.ofMinutes(1)))
-    ),
+    AUTH_LOGIN(5, Duration.ofMinutes(1), Duration.ofMinutes(2)),
+    AUTH_REGISTER(3, Duration.ofMinutes(1), Duration.ofMinutes(5)),
+    REGULAR(40, Duration.ofSeconds(10), null);
 
-    AUTH_REGISTER(
-            Bandwidth.classic(3,
-                    Refill.intervally(3, Duration.ofMinutes(1)))
-    ),
+    private final int limit;
+    private final Duration window;
+    private final Duration ban;
 
-    REGULAR(
-            Bandwidth.classic(4,
-                    Refill.intervally(4, Duration.ofSeconds(10)))
-    );
-
-    private final Bandwidth bandwidth;
-
-    RateLimitPolicy(Bandwidth bandwidth) {
-        this.bandwidth = bandwidth;
+    RateLimitPolicy(int limit, Duration window, Duration ban) {
+        this.limit = limit;
+        this.window = window;
+        this.ban = ban;
     }
 
-    public Bandwidth getBandwidth() {
-        return bandwidth;
+    public int getLimit() {
+        return limit;
+    }
+
+    public Duration getWindow() {
+        return window;
+    }
+
+    public Duration getBan() {
+        return ban;
     }
 }
-

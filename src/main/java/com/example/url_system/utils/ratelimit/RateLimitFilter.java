@@ -69,7 +69,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        if ("POST".equals(method) && "/auth/login".equals(path)) {
+        if ("POST".equals(method) && "/auth/signin".equals(path)) {
             return RateLimitPolicy.AUTH_LOGIN;
         }
         if ("POST".equals(method) && "/auth/register".equals(path)) {

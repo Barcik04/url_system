@@ -7,7 +7,6 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.UrlService;
-import com.example.url_system.utils.emailSender.EmailKafkaConsumer;
 import com.example.url_system.utils.emailSender.EmailSender;
 import com.example.url_system.utils.emailSender.OutboxDispatcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
