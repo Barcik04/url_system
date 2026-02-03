@@ -53,6 +53,8 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
     networks:
       - backend
+    volumes:
+      - kafka-data:/tmp/kraft-controller-logs
     restart: unless-stopped
 
 
@@ -76,8 +78,9 @@ services:
 
 
 volumes:
-  db_dev_data:
+  db:
   redis_data:
+  kafka-data:
 
 networks:
   backend:

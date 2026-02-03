@@ -59,6 +59,7 @@ services:
       - "9090:9090"
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
     networks:
       - backend
     depends_on:
@@ -74,6 +75,9 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
     networks:
       - backend
     depends_on:
@@ -119,6 +123,8 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
     networks:
       - backend
+    volumes:
+      - kafka-data:/tmp/kraft-controller-logs
     restart: unless-stopped
 
 
@@ -143,6 +149,10 @@ services:
 volumes:
   db:
   redis_data:
+  grafana-data:
+  prometheus-data:
+  kafka-data:
+
 
 networks:
   backend:
