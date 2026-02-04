@@ -21,7 +21,8 @@ public class OutboxDispatcher {
 
     private static final Map<String, String> STATUSES = new HashMap(Map.of(
             "EMAIL_SEND_REQUESTED", "email.send.requested",
-            "SIGNIN_FAIL", "signin.fail"
+            "SIGNIN_FAIL", "signin.fail",
+            "EMAIL_VERIFY", "email.verify"
     ));
 
     private final OutboxEventRepository repo;
