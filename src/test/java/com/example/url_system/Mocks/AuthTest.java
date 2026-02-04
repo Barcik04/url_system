@@ -63,6 +63,8 @@ class AuthTest {
     OutboxEventRepository outboxEventRepository;
     @MockitoBean
     RedisCacheClient redisCacheClient;
+    @MockitoBean
+    AuthController authController;
 
 
 

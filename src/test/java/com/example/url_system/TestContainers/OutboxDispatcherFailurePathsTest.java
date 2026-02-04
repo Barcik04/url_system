@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -88,6 +89,14 @@ class OutboxDispatcherFailurePathsTest {
 
         outboxDispatcher.publishOne(event.getId());
 
+        await()
+                .atMost(Duration.ofSeconds(3))
+                .pollInterval(Duration.ofMillis(50))
+                .untilAsserted(() -> {
+                    OutboxEvent failedEvent = outboxEventRepository.findById(event.getId()).orElseThrow();
+                    assertEquals(OutboxEvent.Status.FAILED, failedEvent.getStatus());
+                });
+
         OutboxEvent failedEvent = outboxEventRepository.findById(event.getId()).orElseThrow();
         assertEquals(OutboxEvent.Status.FAILED, failedEvent.getStatus());
         assertNotNull(failedEvent.getLastError());
@@ -113,6 +122,15 @@ class OutboxDispatcherFailurePathsTest {
         OutboxEvent saved = outboxEventRepository.save(e);
 
         outboxDispatcher.publishOne(saved.getId());
+
+
+        await()
+                .atMost(Duration.ofSeconds(3))
+                .pollInterval(Duration.ofMillis(50))
+                .untilAsserted(() -> {
+                    OutboxEvent failedEvent = outboxEventRepository.findById(saved.getId()).orElseThrow();
+                    assertEquals(OutboxEvent.Status.DEAD, failedEvent.getStatus());
+                });
 
         OutboxEvent dead = outboxEventRepository.findById(saved.getId()).orElseThrow();
         assertEquals(OutboxEvent.Status.DEAD, dead.getStatus());

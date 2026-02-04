@@ -5,6 +5,7 @@ import com.example.url_system.repositories.OutboxEventRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,6 @@ public class OutboxDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
 
-    private static final String EMAIL_TOPIC = "email.send.requested";
     private static final Map<String, String> STATUSES = new HashMap(Map.of(
             "EMAIL_SEND_REQUESTED", "email.send.requested",
             "SIGNIN_FAIL", "signin.fail"
@@ -64,6 +64,7 @@ public class OutboxDispatcher {
 
 
 
+    @Async(value = "emailExecutor")
     public void publishOne(Long id) {
         OutboxEvent e = repo.findById(id).orElseThrow();
 
@@ -71,7 +72,7 @@ public class OutboxDispatcher {
             return;
         }
 
-        if (STATUSES.keySet().stream().noneMatch(a -> a.equals(e.getEventType()))) {
+        if (!STATUSES.containsKey(e.getEventType())) {
             markDead(id, "Unsupported eventType=" + e.getEventType());
             return;
         }
@@ -118,7 +119,7 @@ public class OutboxDispatcher {
         boolean dead = e.getAttempts() >= 10;
         e.setStatus(dead ? OutboxEvent.Status.DEAD : OutboxEvent.Status.FAILED);
         e.setLastError(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-        e.setNextAttemptAt(nextRetryTime(e.getAttempts(), Instant.now(clock)));
+        e.setNextAttemptAt(dead ? null : nextRetryTime(e.getAttempts(), Instant.now(clock)));
         repo.save(e);
 
     }

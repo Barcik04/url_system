@@ -24,17 +24,20 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    @Size(min = 8, message = "password has to be at least 4 characters")
+    @Size(min = 8, message = "password has to be at least 8 characters")
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role =  Role.USER;
 
-
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private Set<Url> urls = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<RefreshToken> refreshTokens = new HashSet<>();
 
 
     public User(String username, String password, Role role) {
@@ -93,6 +96,14 @@ public class User {
 
     public void addUrl(Url url) {
         this.urls.add(url);
+    }
+
+    public Set<RefreshToken> getRefreshTokens() {
+        return refreshTokens;
+    }
+
+    public void setRefreshTokens(Set<RefreshToken> refreshTokens) {
+        this.refreshTokens = refreshTokens;
     }
 
     @Override

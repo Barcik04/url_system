@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import java.time.*;
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -126,6 +127,14 @@ class OutboxPipelineKafkaTest {
             consumer.poll(Duration.ofMillis(200));
 
             outboxDispatcher.publishOne(event.getId());
+
+            await()
+                    .atMost(Duration.ofSeconds(3))
+                    .pollInterval(Duration.ofMillis(50))
+                    .untilAsserted(() -> {
+                        OutboxEvent failedEvent = outboxEventRepository.findById(processing.getId()).orElseThrow();
+                        assertEquals(OutboxEvent.Status.DONE, failedEvent.getStatus());
+                    });
 
             OutboxEvent done = outboxEventRepository.findById(event.getId()).orElseThrow();
             assertEquals(OutboxEvent.Status.DONE, done.getStatus());
