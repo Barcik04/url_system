@@ -1,14 +1,23 @@
 package com.example.url_system.jwt;
 
+import com.example.url_system.dtos.CreateResponseUrlDto;
 import com.example.url_system.dtos.OutboxPayloadDto;
+import com.example.url_system.exceptions.ApiError;
 import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.models.Role;
 import com.example.url_system.models.User;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.services.EmailVerificationService;
 import com.example.url_system.utils.redis.RedisCacheClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,10 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.GrantedAuthority;
 
 
@@ -34,6 +40,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Tag(
+        name = "auth",
+        description = "Endpoints for signing in, registering, logout and refreshing tokens"
+)
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -47,10 +57,12 @@ public class AuthController {
     private final ObjectMapper objectMapper;
     private final RedisCacheClient redisCacheClient;
     private final RefreshTokenService refreshTokenService;
+    private final EmailVerificationService emailVerificationService;
 
 
 
-    public AuthController(AuthenticationManager authManager, JwtUtils jwt, UserRepository userRepo, PasswordEncoder passwordEncoder, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, RedisCacheClient redisCacheClient, RefreshTokenService refreshTokenService) {
+
+    public AuthController(AuthenticationManager authManager, JwtUtils jwt, UserRepository userRepo, PasswordEncoder passwordEncoder, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, RedisCacheClient redisCacheClient, RefreshTokenService refreshTokenService, EmailVerificationService emailVerificationService) {
         this.authManager = authManager;
         this.jwt = jwt;
         this.userRepo = userRepo;
@@ -59,10 +71,28 @@ public class AuthController {
         this.objectMapper = objectMapper;
         this.redisCacheClient = redisCacheClient;
         this.refreshTokenService = refreshTokenService;
+        this.emailVerificationService = emailVerificationService;
     }
 
 
 
+    @Operation(
+            summary = "Signin endpoint, returning JWT bearer token, creates refresh_token also",
+            tags = {"Create"})
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token with username and roles",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Bad credentials"
+            )
+    })
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
         String userIp = resolveClientIp(request);
@@ -74,6 +104,9 @@ public class AuthController {
         }
 
 
+
+
+
         try {
             Authentication auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
@@ -82,12 +115,20 @@ public class AuthController {
             assert user != null;
             String token = jwt.generateTokenFromUsername(user);
 
+
+
+
             List<String> roles = user.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .toList();
 
             User dbUser = userRepo.findByUsername(user.getUsername())
                     .orElseThrow();
+
+            if (dbUser.getEnabled().equals(false)) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "message", "Email not verified"));
+            }
 
             String rawRefresh = refreshTokenService.issueRefreshToken(dbUser);
 
@@ -126,6 +167,22 @@ public class AuthController {
         }
     }
 
+
+
+
+    @Operation(
+            summary = "Register endpoint for creating an account",
+            tags = {"Create"})
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Registered"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Username already taken"
+            )
+    })
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest req) {
         if (userRepo.existsByUsername(req.getUsername())) {
@@ -137,10 +194,50 @@ public class AuthController {
         user.setRole(Role.USER);
 
         userRepo.save(user);
-        return ResponseEntity.ok("Registered");
+
+        String verifyBaseUrl = "http://localhost:8080/auth/verify-email";
+
+        emailVerificationService.createAndSendFor(user, verifyBaseUrl);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Registered. Please verify your email."
+        ));
     }
 
 
+
+
+
+    @Operation(summary = "Verify email using token", tags = {"Create"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email verified"),
+            @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+    })
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        try {
+            emailVerificationService.verifyToken(token);
+            return ResponseEntity.ok(Map.of("message", "Email verified. You can sign in now."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+
+
+
+
+
+
+    @Operation(
+            summary = "Logout from account and revoke JWT refresh token",
+            tags = {"Create"})
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Logged out"
+            )
+    })
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String raw = getCookie(request, REFRESH_COOKIE);
@@ -164,6 +261,19 @@ public class AuthController {
     }
 
 
+    @Operation(
+            summary = "Endpoint for refreshing refresh token",
+            tags = {"Create"})
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Registered"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Username already taken"
+            )
+    })
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
         String raw = getCookie(request, REFRESH_COOKIE);

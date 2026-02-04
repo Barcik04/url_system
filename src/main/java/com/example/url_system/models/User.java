@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +32,12 @@ public class User {
     @Column(nullable = false)
     private Role role =  Role.USER;
 
+    @Column(nullable = false)
+    private boolean enabled = false;
+
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private Set<Url> urls = new HashSet<>();
@@ -38,6 +45,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<RefreshToken> refreshTokens = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private EmailVerificationToken emailVerificationToken;
+
 
 
     public User(String username, String password, Role role) {
@@ -52,6 +64,11 @@ public class User {
     }
 
     public User() {
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.emailVerifiedAt = null;
     }
 
     public Long getId() {
@@ -105,6 +122,23 @@ public class User {
     public void setRefreshTokens(Set<RefreshToken> refreshTokens) {
         this.refreshTokens = refreshTokens;
     }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Instant getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    public void setEmailVerifiedAt(Instant emailVerifiedAt) {
+        this.emailVerifiedAt = emailVerifiedAt;
+    }
+
 
     @Override
     public boolean equals(Object o) {

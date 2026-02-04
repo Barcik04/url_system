@@ -1,9 +1,13 @@
 ### ABOUT
-    --System allows users to have their own data base of url from which 
-        system also creates a short version of. That esures link wont be
-            a string of 2048 chars. User can also set expiry date on each link.
-                Users can also check stats for each link and see how many times
-                    their link has been clicked etc.
+    This project is a URL shortening platform built as a REST API.
+    
+    It allows users to:
+        - register and verify accounts via email,
+        - create short URLs with optional expiration dates,
+        - track click statistics for each link,
+        - manage their own URL collection.
+    
+    The system focuses on security, observability and asynchronous processing.
 
 
 ### SYSTEM
@@ -47,7 +51,7 @@
     - Grafana
 
     ##Messaging
-    -Kafka
+    - Kafka
 
     ## CI / CD / Quality
     - Qodana
@@ -123,23 +127,43 @@
     -- depandabot.yml:
         checks vialability of dependencies versions
 
-### ARCHITECTURE
-    The project is a REST API built using a onion architecture
-    
-    The codebase is organized by groups (e.g. services, dtos, controllers), where each contains:
-        -REST Controllers
-        -dtos
-        -exceptions
-        -jwt (Bearer Authentication)
-        -repostiories (JPA data access)
-        -security   
-        -services (buisness logic)
-        - utils (rate-limit, logger, scheduling, redis, configs, emailSender)
 
+
+### SYSTEM ARCHITECTURE
+    The application follows an Onion Architecture:
+    
+        - Controllers – REST API endpoints
+        - Dtos - APIs dtos
+        - Exceptions - global excpetion handler plus custon exceptions
+        - Jwt – JWT, authentication filters, 
+        - Models - entities of system tables
+        - Repositories – data access layer
+        - Services – business logic
+        - Utils - configs and side jobs like (async, filtering, email sender, logger, ratelimit, redis, scheduling, hashing)
+
+    Asynchronous operations (emails, notifications) are handled using:
+        - Outbox Pattern
+        - Kafka messaging
+
+
+### ASYNCHRONOUS PROCESSING
+    Email delivery and side tasks use outbox pattern:
+        1. System writes an outbox event to db
+        2. Scheduled dispatcher publishes event to Kafka
+        3. Kafka consumers polls events asynchronusly 
+        4. Failures are retried and backedoff
+
+
+### SECURITY
+        - JWT authentication with refresh tokens (30 days)
+        - Email verification required before account activation
+        - Redis-based rate limiting with temporary bans
+        - Idempotency keys to prevent duplicate requests
+        - Secure password hashing
 
 
 ### WHATS IMPLEMENTED
-    -- Rate limiting ip or userId based on Redis 
+    -- Rate limiting ip or userId based on Redis with auto blocking when user is doing way too much requests
     -- Actuator + Prometheus + Grafana
     -- JaCoCo
     -- Depandabot CI
@@ -171,13 +195,10 @@
 
 
 ## WHAT TO DO
-    -- email verification
-    -- swagger in authcontroller
-    -- outbox and refresh_tokens indexing
     -- AWS
     -- react
     -- Kubernetes
-    --fix readme (add graph, what the system is for etc.)
+    first ill generate a db schema graph from my migration files. Then architecture graph. Then lifecycle graph
 
     ### LEAVE IT FOR NOW:
         -- Admin panel (user list, disable/ban user, role changes)
