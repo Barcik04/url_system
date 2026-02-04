@@ -69,6 +69,13 @@ public class IntegrationTest {
     """);
     }
 
+    @BeforeEach
+    void addUser() {
+        User user = new User("test123@gmail.com", "12345678");
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
 
     @Test
     @Transactional
