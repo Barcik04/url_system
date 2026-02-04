@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean(name = {"emailExecutor", "taskExecutor"})
+    @Bean(name = {"emailExecutor", "taskExecutor", "outboxExpiredExecutor"})
     @Primary
     public Executor executor() {
         ThreadPoolTaskExecutor exec = new ThreadPoolTaskExecutor();

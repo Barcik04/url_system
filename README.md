@@ -26,7 +26,7 @@
     ## Security
     - Spring Security
     - Bucket4j (rate Limiting)
-    - Jwt security 
+    - Jwt security (with refresh tokens 30 days)
     - Redis
     
     ## Validation & API
@@ -145,7 +145,7 @@
     -- Depandabot CI
     -- Qodana quality and Qoadana Tests
     -- Docker Image build and Push to DockerHub via GitHub Action workflows
-    -- JWT
+    -- JWT (with refresh tokens of 30 days)
     -- Global Exception Handler
     -- Idempotency Keys secured
     -- Flyway Migrations (Tables, Constraints, Indexes)
@@ -159,6 +159,7 @@
     -- Kafka (email messaging)
     -- Dynamic filtering 
     -- Grafana Alerts
+    
 
 
 
@@ -170,3 +171,24 @@
 
 
 ## WHAT TO DO
+    -- email verification
+    -- swagger in authcontroller
+    -- outbox and refresh_tokens indexing
+    -- AWS
+    -- react
+    -- Kubernetes
+    --fix readme (add graph, what the system is for etc.)
+
+    ### LEAVE IT FOR NOW:
+        -- Admin panel (user list, disable/ban user, role changes)
+        -- security tesst (JWT + authorization)
+        -- contract tests
+        -- performance tests
+
+    ### For Future/Diffrent projects
+        --Microservices
+        --Chat between users
+        --Payment process
+        -- AI assistant for user support
+        -- GraphQL 
+        -- NO SQL (maybe)
