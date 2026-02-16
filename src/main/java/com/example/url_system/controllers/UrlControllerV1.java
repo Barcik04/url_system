@@ -87,7 +87,7 @@ public class UrlControllerV1 {
     public ResponseEntity<CreateResponseUrlDto> create(
             @Valid @RequestBody CreateUrlRequest  createUrlRequest,
             @AuthenticationPrincipal UserDetails principal,
-            @RequestHeader("Idempotency-Key") String idempotencyKey
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey
     ) {
         if (idempotencyKey == null || idempotencyKey.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing Idempotency-Key");

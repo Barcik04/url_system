@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-@Profile({"dev", "stage"})
+@Profile({"test", "dev", "stage"})
 public class OutboxDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
