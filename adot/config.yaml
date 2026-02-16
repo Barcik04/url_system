@@ -1,0 +1,25 @@
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: url-system
+          metrics_path: /actuator/prometheus
+          static_configs:
+            - targets: ["127.0.0.1:8080"]
+
+extensions:
+  sigv4auth:
+    region: eu-north-1
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "https://aps-workspaces.eu-north-1.amazonaws.com/workspaces/ws-6e4c6e34-098e-40a2-953e-91c1114f99a7/api/v1/remote_write"
+    auth:
+      authenticator: sigv4auth
+
+service:
+  extensions: [sigv4auth]
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [prometheusremotewrite]

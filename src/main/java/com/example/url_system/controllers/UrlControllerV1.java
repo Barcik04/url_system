@@ -196,12 +196,12 @@ public class UrlControllerV1 {
                     description = "Page of user's urls"
             )
     })
-    @GetMapping("/api/v1/show-my-links")
+    @PostMapping("/api/v1/show-my-links")
     @PreAuthorize("hasAuthority('USER')")
     public Page<StatsUrlDto> getMyLinks(
             @PageableDefault(size = 20) Pageable pageable,
             @AuthenticationPrincipal UserDetails principal,
-            @RequestBody UrlFilter filter
+            @RequestBody(required = false) UrlFilter filter
     ) {
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),

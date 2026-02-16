@@ -2,10 +2,11 @@ package com.example.url_system.utils.emailSender;
 
 import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.repositories.OutboxEventRepository;
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,28 +14,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 @Service
-@Profile({"dev", "stage"})
-public class OutboxDispatcher {
+@Profile("prod")
+public class OutboxDispatcherSQS {
+    private static final Logger log = LoggerFactory.getLogger(OutboxDispatcherSQS.class);
 
-    private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
-
-    private static final Map<String, String> STATUSES = new HashMap(Map.of(
-            "EMAIL_SEND_REQUESTED", "email.send.requested",
-            "SIGNIN_FAIL", "signin.fail",
-            "EMAIL_VERIFY", "email.verify"
-    ));
 
     private final OutboxEventRepository repo;
     private final Clock clock;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final SqsTemplate sqsTemplate;
+    private final String emailQueueNameOrUrl;
 
-    public OutboxDispatcher(OutboxEventRepository repo, Clock clock, KafkaTemplate<String, String> kafkaTemplate) {
+    public OutboxDispatcherSQS(
+            OutboxEventRepository repo,
+            Clock clock,
+            SqsTemplate sqsTemplate,
+            @Value("${app.sqs.emailQueue}") String emailQueueNameOrUrl
+    ) {
         this.repo = repo;
         this.clock = clock;
-        this.kafkaTemplate = kafkaTemplate;
+        this.sqsTemplate = sqsTemplate;
+        this.emailQueueNameOrUrl = emailQueueNameOrUrl;
     }
 
 
@@ -75,27 +80,24 @@ public class OutboxDispatcher {
             return;
         }
 
-        if (!STATUSES.containsKey(e.getEventType())) {
-            markDead(id, "Unsupported eventType=" + e.getEventType());
-            return;
-        }
-
-        String payloadJson = e.getPayload().toString();
-
-        String eventTopic = e.getEventType();
-        String topic = STATUSES.get(eventTopic);
-
         try {
-            // Wait for kafka ACK
-            kafkaTemplate.send(topic, String.valueOf(e.getId()), payloadJson).get();
+            String payloadJson = e.getPayload().toString();
+
+            sqsTemplate.send(to -> to
+                    .queue(emailQueueNameOrUrl)
+                    .payload(payloadJson)
+                    .header("eventType", e.getEventType())
+                    .header("outboxId", String.valueOf(e.getId()))
+            );
 
             markDone(id);
-            log.info("Outbox {} published to Kafka topic={}", id, topic);
+            log.info("Outbox {} published to SQS queue={}", id, emailQueueNameOrUrl);
 
         } catch (Exception ex) {
             markFailed(id, ex);
             log.warn("Outbox {} publish FAILED: {}", id, ex.toString());
         }
+
     }
 
 

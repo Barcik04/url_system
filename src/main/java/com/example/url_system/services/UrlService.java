@@ -266,6 +266,7 @@ public class UrlService {
      *
      * @param pageable page request
      * @param userId id of an authenticated user
+     *
      * @return {@link StatsUrlDto} dto of stats for each url
      */
     @Bulkhead(name = "baseService")
