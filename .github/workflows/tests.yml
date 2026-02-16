@@ -5,37 +5,21 @@ on:
   push:
     branches: [ "main", "master" ]
 
+
 jobs:
   test:
-    runs-on: ubuntu-22.04
-    env:
-      TESTCONTAINERS_RYUK_DISABLED: "true"
-      TESTCONTAINERS_REUSE_ENABLE: "false"
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Debug Docker
-        run: |
-          docker --version
-          docker info
-          docker ps
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
-
-      - name: Workaround for Docker 29 (docker-java api version)
-        run: |
-          echo "api.version=1.44" > ~/.docker-java.properties
-          cat ~/.docker-java.properties
-
       - run: chmod +x mvnw
       - run: ./mvnw clean verify
-
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
-          path: target/site/jacoco/
+         name: jacoco-report
+         path: target/site/jacoco/
