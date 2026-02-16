@@ -3,15 +3,13 @@ WORKDIR /app
 
 # cache dependencies
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw mvnw
-RUN chmod +x mvnw && ./mvnw -B -DskipTests dependency:go-offline
+RUN mvn -B -DskipTests dependency:go-offline
 
-# copy sources
-COPY src src
-RUN ./mvnw -B -DskipTests clean package
+# copy sources and build
+COPY src ./src
+RUN mvn -B -DskipTests clean package
 
-# ===== Runtime stage =====
+
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
@@ -19,10 +17,9 @@ WORKDIR /app
 RUN useradd -m appuser
 USER appuser
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
 ENV SERVER_PORT=8080
 
-# basic JVM flags
 ENTRYPOINT ["java","-XX:+UseG1GC","-XX:MaxRAMPercentage=75.0","-jar","/app/app.jar"]
