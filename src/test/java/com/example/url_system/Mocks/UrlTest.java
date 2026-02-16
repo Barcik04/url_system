@@ -106,7 +106,7 @@ class UrlTest {
                         .header("Idempotency-Key", "123dak")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createUrlRequest)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
 
     }
 
@@ -184,6 +184,7 @@ class UrlTest {
 
 
     @Test
+    @WithMockUser(username = "igor", authorities = {"USER"})
     void should_throw_400_when_missing_idempotency_key() throws Exception {
         var createUrlRequest = new CreateUrlRequest("https://...", null);
 

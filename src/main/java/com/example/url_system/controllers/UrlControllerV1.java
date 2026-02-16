@@ -87,7 +87,7 @@ public class UrlControllerV1 {
     public ResponseEntity<CreateResponseUrlDto> create(
             @Valid @RequestBody CreateUrlRequest  createUrlRequest,
             @AuthenticationPrincipal UserDetails principal,
-            @RequestHeader("Idempotency-Key") String idempotencyKey
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey
     ) {
         if (idempotencyKey == null || idempotencyKey.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing Idempotency-Key");
@@ -196,12 +196,12 @@ public class UrlControllerV1 {
                     description = "Page of user's urls"
             )
     })
-    @GetMapping("/api/v1/show-my-links")
+    @PostMapping("/api/v1/show-my-links")
     @PreAuthorize("hasAuthority('USER')")
     public Page<StatsUrlDto> getMyLinks(
             @PageableDefault(size = 20) Pageable pageable,
             @AuthenticationPrincipal UserDetails principal,
-            @RequestBody UrlFilter filter
+            @RequestBody(required = false) UrlFilter filter
     ) {
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),

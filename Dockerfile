@@ -1,31 +1,25 @@
-
-
-# Build stage: compile the Spring Boot application
-FROM eclipse-temurin:21-jdk AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy Maven wrapper and metadata
-COPY mvnw .
+# cache dependencies
 COPY pom.xml .
-COPY .mvn .mvn
+RUN mvn -B -DskipTests dependency:go-offline
 
-RUN chmod +x mvnw
-RUN ./mvnw -B dependency:go-offline
-
-# Copy the rest of the project
-COPY . .
-RUN chmod +x mvnw
-RUN ./mvnw -B package -DskipTests
+# copy sources and build
+COPY src ./src
+RUN mvn -B -DskipTests clean package
 
 
-# Runtime stage: run the built JAR
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+# run as non-root
+RUN useradd -m appuser
+USER appuser
 
-
-# Copy the built artifact from the build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV SERVER_PORT=8080
+
+ENTRYPOINT ["java","-XX:+UseG1GC","-XX:MaxRAMPercentage=75.0","-jar","/app/app.jar"]

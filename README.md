@@ -161,6 +161,20 @@
         - Idempotency keys to prevent duplicate requests
         - Secure password hashing
 
+### HOSTING AWS
+    - prod profile is used for AWS hosting
+    - How to run on AWS:
+        1. build Dockerfile and ./adot Dockerfile (for prometheus)
+        2. Push both to ECR registry
+        3. Boot up RDS PostgreSQL
+        4. Boot up Amazon Prometheus
+        4. Boot up EliastiCache for Redis
+        5. Build task with two containers containing these Dockerfiles
+        6. Connect container 1 to RDS, ElastiCache, SQS and container 2 to Amazon Prometheus
+        7. Boot up Amazon Grafana and connect it to Prometheus
+        8. Boot up Amazon SQS for queuing 
+        9. Run service with created task
+
 
 ### WHATS IMPLEMENTED
     -- Rate limiting ip or userId based on Redis with auto blocking when user is doing way too much requests
@@ -179,7 +193,7 @@
     -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
     -- Redis caching
     -- Async thread pool config
-    -- Scheduled email sending on expired urls with Kafka (Async, Outbox)
+    -- Scheduled email sending on expired urls with Kafka (Async, Outbox) for dev, Amazon SQS for prod
     -- Kafka (email messaging)
     -- Dynamic filtering 
     -- Grafana Alerts
@@ -196,6 +210,7 @@
 
 ## WHAT TO DO
     -- AWS
+    -- CD auto deploy to ECR
     -- react
     -- Kubernetes
     first ill generate a db schema graph from my migration files. Then architecture graph. Then lifecycle graph
@@ -213,3 +228,10 @@
         -- AI assistant for user support
         -- GraphQL 
         -- NO SQL (maybe)
+
+
+
+
+### TOMORROW
+    - BUILD ECS, Sercurity Groups from scratch 
+    - ENV wars in secret manager?

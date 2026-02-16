@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -195,9 +196,8 @@ public class AuthController {
 
         userRepo.save(user);
 
-        String verifyBaseUrl = "http://localhost:8080/auth/verify-email";
 
-        emailVerificationService.createAndSendFor(user, verifyBaseUrl);
+        emailVerificationService.createAndSendFor(user, publicBaseUrl());
 
         return ResponseEntity.ok(Map.of(
                 "message", "Registered. Please verify your email."
@@ -307,7 +307,7 @@ public class AuthController {
     private void setRefreshCookie(HttpServletResponse response, String rawRefreshToken, int maxAgeSeconds) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, rawRefreshToken)
                 .httpOnly(true)
-                .secure(false) // true in prod
+                .secure(true) // true in prod
                 .path("/")
                 .maxAge(maxAgeSeconds)
                 .sameSite("Lax") // "None" if cross-site + Secure=true
@@ -319,7 +319,7 @@ public class AuthController {
     private void clearRefreshCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, "")
                 .httpOnly(true)
-                .secure(false) // true in prod
+                .secure(true) // true in prod
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")
@@ -328,5 +328,12 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
+
+    @Value("${app.publicBaseUrl}")
+    private String publicBaseUrl;
+
+    private String publicBaseUrl() {
+        return publicBaseUrl + "/auth/verify-email";
+    }
 
 }
