@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       TESTCONTAINERS_RYUK_DISABLED: "true"
       TESTCONTAINERS_REUSE_ENABLE: "false"
@@ -25,6 +25,11 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+
+      - name: Workaround for Docker 29 (docker-java api version)
+        run: |
+          echo "api.version=1.44" > ~/.docker-java.properties
+          cat ~/.docker-java.properties
 
       - run: chmod +x mvnw
       - run: ./mvnw clean verify
