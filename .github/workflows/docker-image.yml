@@ -15,6 +15,10 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: eu-north-1
+      ECR_REPO_NAME: url-system
+
 
     steps:
       - name: Checkout
