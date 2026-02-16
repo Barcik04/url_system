@@ -15,6 +15,10 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: eu-north-1
+      ECR_REPO_NAME: url-system
+
 
     steps:
       - name: Checkout
@@ -32,11 +36,6 @@ jobs:
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Ensure ECR repo exists
-        run: |
-          aws ecr describe-repositories --repository-names "${{ env.ECR_REPOSITORY }}" --region "${{ env.AWS_REGION }}" \
-          || aws ecr create-repository --repository-name "${{ env.ECR_REPOSITORY }}" --region "${{ env.AWS_REGION }}"
 
       - name: Verify Docker
         run: |
