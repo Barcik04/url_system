@@ -1,6 +1,6 @@
 package com.example.url_system.utils.emailSender;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.example.url_system.utils.emailSender.EmailPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

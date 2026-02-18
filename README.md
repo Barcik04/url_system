@@ -121,7 +121,7 @@
     -- qodana_code_quality.yml: 
         On every push and pull Code quality analysis is performed using Qodana
     -- docker-image.yml:
-        On every pull docker image is being built and checked by Trivy which then is pushed to DockerHub
+        On every pull docker image is being built and checked by Trivy which then is pushed to AWS ECR
     -- tests.yml:
         tests are run and JaCoCo report is being issued
     -- depandabot.yml:
@@ -182,7 +182,7 @@
     -- JaCoCo
     -- Depandabot CI
     -- Qodana quality and Qoadana Tests
-    -- Docker Image build and Push to DockerHub via GitHub Action workflows
+    -- Docker Image build and Push to AWS ECR via GitHub Action workflows
     -- JWT (with refresh tokens of 30 days)
     -- Global Exception Handler
     -- Idempotency Keys secured
