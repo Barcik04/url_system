@@ -9,7 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile({"prod", "stage"})
+@Profile({"stage"})
 public class SmtpEmailSender implements EmailSender {
 
     private final JavaMailSender mailSender;
