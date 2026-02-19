@@ -50,6 +50,9 @@ public class User {
     @JsonIgnore
     private EmailVerificationToken emailVerificationToken;
 
+    @Column(name = "avatar_key")
+    private String avatarKey;
+
 
 
     public User(String username, String password, Role role) {
@@ -139,6 +142,29 @@ public class User {
         this.emailVerifiedAt = emailVerifiedAt;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public EmailVerificationToken getEmailVerificationToken() {
+        return emailVerificationToken;
+    }
+
+    public void setEmailVerificationToken(EmailVerificationToken emailVerificationToken) {
+        this.emailVerificationToken = emailVerificationToken;
+    }
+
+    public String getAvatarKey() {
+        return avatarKey;
+    }
+
+    public void setAvatarKey(String avatarKey) {
+        this.avatarKey = avatarKey;
+    }
 
     @Override
     public boolean equals(Object o) {
