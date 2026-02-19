@@ -21,7 +21,10 @@ public class EmailSqsLambdaHandler implements RequestHandler<SQSEvent, SQSBatchR
             .build();
 
     private static final String FROM_EMAIL = getEnv("FROM_EMAIL", "");
-    private static final String CONFIG_SET = System.getenv("SES_CONFIGURATION_SET"); // opcjonalne
+    private static final String CONFIG_SET = System.getenv("SES_CONFIGURATION_SET");
+
+
+
 
     @Override
     public SQSBatchResponse handleRequest(SQSEvent event, Context context) {
@@ -49,6 +52,9 @@ public class EmailSqsLambdaHandler implements RequestHandler<SQSEvent, SQSBatchR
 
         return new SQSBatchResponse(failures);
     }
+
+
+
 
     private static void sendEmailSes(String to, String subject, String html) {
         if (FROM_EMAIL.isBlank()) {
@@ -86,6 +92,10 @@ public class EmailSqsLambdaHandler implements RequestHandler<SQSEvent, SQSBatchR
 
         ses.sendEmail(req.build());
     }
+
+
+
+
 
     private static String buildVerifyHtml(String verifyUrl) {
         return """
