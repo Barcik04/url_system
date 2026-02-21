@@ -9,6 +9,7 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.EmailVerificationService;
+import com.example.url_system.utils.emailSender.OutboxDispatcher;
 import com.example.url_system.utils.redis.RedisCacheClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -48,6 +51,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
 
 
     private final AuthenticationManager authManager;
@@ -196,7 +200,7 @@ public class AuthController {
 
         userRepo.save(user);
 
-
+        log.info("registered user {}", user.getUsername());
         emailVerificationService.createAndSendFor(user, publicBaseUrl());
 
         return ResponseEntity.ok(Map.of(

@@ -42,7 +42,7 @@ services:
       SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_FLYWAY_USER: ${POSTGRES_USER}
       SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: stage
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
