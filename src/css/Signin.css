@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    background-color: #160124;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;   
+    align-items: center;      
+    height: 100vh;   
+}
+
+
+
+.loginForm {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #2F024D;
+    border-radius: 12px;
+    width: 320px;
+}
+
+.loginForm form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.loginForm h1 {
+    color: white;
+    text-align: center;
+}
