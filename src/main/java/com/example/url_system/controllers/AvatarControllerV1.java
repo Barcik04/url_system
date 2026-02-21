@@ -25,7 +25,7 @@ public class AvatarControllerV1 {
             @Valid @RequestBody PresignAvatarUploadRequest req,
             Authentication authentication
     ) {
-        String name = authentication.getName(); // zwykle email/username
+        String name = authentication.getName();
         return ResponseEntity.ok(avatarService.presignUpload(name, req.contentType()));
     }
 

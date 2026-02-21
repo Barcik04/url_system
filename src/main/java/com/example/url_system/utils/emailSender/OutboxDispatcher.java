@@ -4,6 +4,7 @@ import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.repositories.OutboxEventRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -16,7 +17,8 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-@Profile({"test", "dev", "stage"})
+@Profile({"test", "dev", "stage", "prod"})
+@ConditionalOnProperty(name = "app.sqs.enabled", havingValue = "false", matchIfMissing = true)
 public class OutboxDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(OutboxDispatcher.class);
