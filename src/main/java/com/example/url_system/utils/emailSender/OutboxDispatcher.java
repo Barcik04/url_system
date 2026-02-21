@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-@Profile({"test", "dev", "stage", "prod"})
+@Profile({"test", "dev", "stage"})
 @ConditionalOnProperty(name = "app.sqs.enabled", havingValue = "false", matchIfMissing = true)
 public class OutboxDispatcher {
 
