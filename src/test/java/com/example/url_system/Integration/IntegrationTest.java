@@ -10,6 +10,7 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
 import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.services.AvatarService;
 import com.example.url_system.services.IdempotencyKeyService;
 import com.example.url_system.services.UrlService;
 import com.example.url_system.utils.dynamicFiltering.UrlFilter;
@@ -57,6 +58,8 @@ public class IntegrationTest {
     @MockitoBean
     private EmailSender emailSender;
 
+    @MockitoBean
+    private AvatarService avatarService;
 
     @BeforeEach
     void cleanDb() {

@@ -21,7 +21,7 @@ import java.util.Map;
 
 
 @Service
-@Profile({"prod", "!stage"})
+@Profile("prod & !stage")
 @ConditionalOnProperty(name = "app.sqs.enabled", havingValue = "true")
 public class OutboxDispatcherSQS {
     private static final Logger log = LoggerFactory.getLogger(OutboxDispatcherSQS.class);
