@@ -43,6 +43,7 @@ public class OutboxDispatcher {
 
     @Scheduled(fixedDelayString = "PT10S")
     public void tick() {
+        log.info("doing outbox dispatcher");
         List<Long> ids = claimBatch(50);
         for (Long id : ids) {
             publishOne(id);
@@ -56,6 +57,7 @@ public class OutboxDispatcher {
         Instant now = Instant.now(clock);
 
         List<OutboxEvent> due = repo.findDueForUpdateSkipLocked(now, limit);
+        log.info("number of due {}", due.size());
 
         for (OutboxEvent e : due) {
             e.setStatus(OutboxEvent.Status.PROCESSING);
