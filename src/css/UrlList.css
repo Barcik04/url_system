@@ -1,0 +1,64 @@
+
+/* Search bar */
+.searchBar h2{
+    color: white;
+    font-size: 20px;
+    margin-left: 55px;
+
+}
+
+.searchBar {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 150px;
+    top: 225px;
+    color: white;
+    gap: 7px;
+}
+
+
+.tableWrap {
+  margin-top: 12px;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px; 
+  color: white;
+}
+
+.table th, .table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  font-weight: 700;
+  background: #735686;
+}
+
+.table tbody tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cellLong {
+  max-width: 520px;
+  word-break: break-word; /* żeby long url nie rozwalał layoutu */
+}
