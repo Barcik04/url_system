@@ -32,20 +32,20 @@ function Signup() {
 
     return (
         <div className="registerForm">
-        <h1>Signup</h1>
+            <h1>Signup</h1>
 
-        <form onSubmit={handleSubmit}>
-            <input placeholder="email" value={username} onChange={(e) => setUsername(e.target.value)}/>
-            <br />
+            <form onSubmit={handleSubmit}>
+                <input placeholder="email" value={username} onChange={(e) => setUsername(e.target.value)}/>
+                <br />
 
-            <input placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
-            <br />
+                <input placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
+                <br />
 
-            <button type="submit">Create account</button>
-            <button type="button" onClick={() => navigate("/signin")}>Go to Sign in</button>
-        </form>
+                <button type="submit">Create account</button>
+                <button type="button" onClick={() => navigate("/signin")}>Go to Sign in</button>
+            </form>
 
-        <p>{msg}</p>
+            <p>{msg}</p>
         </div>        
     )
 }

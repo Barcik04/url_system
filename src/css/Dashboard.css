@@ -1,28 +1,42 @@
 .dashboard {
-    display: flex;
-    flex-direction: column; 
-    padding: 20px;
+  min-height: 80vh;
+  display: flex;
+  justify-content: center; 
+  padding: 40px 20px;
+}
+
+.dashboardInner {
+  width: 100%;
+  max-width: 1200px; 
+}
+
+.dashboardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; 
+  margin-bottom: 20px;
+}
+
+.dashboardButtons {
+  margin-top: 10px;
+  display: flex;
+  gap: 7px;
 }
 
 .h1Dashboard {
-    position: absolute;
-    top: 100px;
-    left: 840px;
-    color: white;
-    font-size: 50px;
-    margin-bottom: 100px;
+  color: white;
+  font-size: 50px;
+  margin: 0;
 }
 
 .createBtn {
-    position: fixed;
-    top: 30%px;
-    left: 38%;
-    padding: 5px 15px 5px 15px;
-    background-color: #735686;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    color: white;
-    transform: translate(200px, -50px);
+  padding: 8px 16px;
+  background-color: #735686;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transform: none;   
 }

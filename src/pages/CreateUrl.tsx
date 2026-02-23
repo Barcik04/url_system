@@ -7,8 +7,12 @@ function newIdempotencyKey() {
 }
 
 
+type Props = {
+  onCreated?: (shortUrl: string) => void;
+};
 
-function CreateUrl() {
+
+function CreateUrl({ onCreated }: Props) {
     const [longUrl, setLongUrl] = useState("")
     const [expiredAt, setExpiredAt] = useState("")
     const [msg, setMsg] = useState("")
@@ -35,6 +39,8 @@ function CreateUrl() {
 
             setMsg("Creation Success")
             setIdempotencyKey(newIdempotencyKey())
+            const short = `${import.meta.env.VITE_API_URL}/${data.shortUrl}`;
+            onCreated?.(short);
         } catch(e) {
             setMsg("Network error")
             console.log(e)
@@ -44,9 +50,10 @@ function CreateUrl() {
     return (
         <form className="createUrlForm" onSubmit={handleUrlCreate}>
             <h1>Create Url</h1>
-            <input value={longUrl} placeholder="url" onChange={(e) => setLongUrl(e.target.value)} />
-            <input value={expiredAt} placeholder="date of expiry" onChange={(e) => setExpiredAt(e.target.value)} type="date" />
-            <button type="submit" disabled={!longUrl}>Create</button>
+            <input className="longUrl" value={longUrl} placeholder="Insert your url to convert" onChange={(e) => setLongUrl(e.target.value)} />
+            <h2>Expiry date (Optional)</h2>
+            <input className="expiryDate" value={expiredAt} placeholder="date of expiry" onChange={(e) => setExpiredAt(e.target.value)} type="date" />
+            <button className="createUrlBtn" type="submit" disabled={!longUrl}>Create</button>
             <p>{msg}</p>
         </form>
     )

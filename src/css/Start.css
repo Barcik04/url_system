@@ -1,0 +1,56 @@
+.resultBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.resultBox h2 {
+    color: azure;
+    font-size: 30px;
+}
+
+
+.resultInnerBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+
+    padding: 10px;
+    background-color: #0D0C0E;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    gap: 10px;
+
+    width: 540px;
+}
+
+.resultInnerBox a {
+    text-decoration: none;
+    font-size: 24px;
+    color: azure;
+}
+
+
+.copyBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.copyBtn img {
+    filter: invert(1);
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+    transition: 0.15s;
+}
+
+.copyBtn img:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+

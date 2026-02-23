@@ -32,6 +32,22 @@ function shorten(url: string, length: number = 20) {
 
 
 
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("pl-PL", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
+
+
+
 function UrlList() {
     const [q, setQ] = useState("");
     const [expired, setExpired] = useState(false);
@@ -82,51 +98,47 @@ function UrlList() {
 
     return (
         <div>
-            <div className="searchBar"> 
-                <h2>Filters</h2>
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by url"/>
-                <label>
-                    Expired only
-                    <input type="checkbox" checked={expired} onChange={(e) => setExpired(e.target.checked)} />
-
-                </label>
-                
-            </div>
             <div className="urlList">
+                <div className="searchBar"> 
+                    <input className="stringSearch" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by url"/>
+                    <label className="isExpiredCheck">
+                        Expired only
+                        <input className="isExpiredInput" type="checkbox" checked={expired} onChange={(e) => setExpired(e.target.checked)} />
+                    </label>
+                
+                </div>
 
                 {msg && <p>{msg}</p>}
 
                 {!pageData ? (
                     <p>Loading...</p>
-                ) : pageData.empty ? (
-                    <p>No links yet</p>
                 ) : (
                     <div className="tableWrap">
-                    <table className="table">
-                        <thead>
-                        <tr>
-                            <th>longUrl</th>
-                            <th>code</th>
-                            <th>createdAt</th>
-                            <th>expiresAt</th>
-                            <th className="num">clicks</th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-                        {pageData.content.map((u) => (
-                            <tr key={u.code}>
-                            <td className="cellLong" title={u.longUrl}> {shorten(u.longUrl)} </td>
-                            <td className="mono">
-                                <a href={`${SHORT_BASE}/${u.code}`} target="_blank" rel="noreferrer"> {SHORT_BASE}/{u.code} </a>
-                            </td>
-                            <td className="mono">{u.createdAt}</td>
-                            <td className="mono">{u.expiresAt}</td>
-                            <td className="num">{u.clicks}</td>
+                        <table className="table">
+                            <thead>
+                            <tr>
+                                <th>longUrl</th>
+                                <th>shortUrl</th>
+                                <th>createdAt</th>
+                                <th>expiresAt</th>
+                                <th className="num">clicks</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+                            {pageData.content.map((u) => (
+                                <tr key={u.code}>
+                                <td className="cellLong" title={u.longUrl}> {shorten(u.longUrl)} </td>
+                                <td className="mono">
+                                    <a href={`${SHORT_BASE}/${u.code}`} target="_blank" rel="noreferrer"> {SHORT_BASE}/{u.code} </a>
+                                </td>
+                                <td className="mono">{fmtDate(u.createdAt)}</td>
+                                <td className="mono">{fmtDate(u.expiresAt)}</td>
+                                <td className="num">{u.clicks}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
                 </div>

@@ -42,6 +42,7 @@ function Signin() {
       <input value={username} placeholder="email" onChange={(e) => setUsername(e.target.value)} />
       <input value={password} placeholder="password" onChange={(e) => setPassword(e.target.value)} type="password" />
       <button type="submit">Sign in</button>
+      <button type="button" onClick={() => navigate("/signup")}>I Dont have an account yet</button>
       <p>{msg}</p>
     </form>
   )

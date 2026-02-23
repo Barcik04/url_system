@@ -1,16 +1,19 @@
 .sidebar{
   position: fixed;
-  top: -40px;
+  top: 0px;
   right: 0;
-  width: 260px;
-  height: 120vh;
+  width: 290px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
 
   background: rgba(0,0,0,0.75);
   backdrop-filter: blur(8px);
   color: white;
   text-align: right;
   font-weight: bolder;
-  font-size: 40px;
+  font-size: 42px;
 
   padding: 20px;
 
@@ -21,6 +24,11 @@
   z-index: 9999;
 }
 
+.menuWrapper {
+  transform: translateY(-46px);
+}
+
+
 .sidebar.open{
   transform: translateX(0);
 }
@@ -28,12 +36,23 @@
 .menu {
   list-style: none;
   font-size: 30px;
+
+  
 }
 
-.menu li {
+.menu li { 
   padding-bottom: 10px;
+  transition: 0.3s;
 }
 
+.menu li:hover {
+  transform: translateX(-10px);
+}
+
+.menu a {
+  text-decoration: none;  
+  color: white;        
+}
 
 
 .overlay{
@@ -41,4 +60,24 @@
   inset: 0;
   background: rgba(0,0,0,0.4);
   z-index: 9998;
+}
+
+
+.logoutBtn {
+  margin-top: auto;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 5px;
+  color: azure;
+  background-color: rgba(255, 0, 0, 0.39);
+  border: none;
+  border-radius: 5px;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logoutBtn:hover {
+  transform: scale(1.01);
+  background-color: red;
 }
