@@ -20,14 +20,16 @@ body {
     width: 320px;
 }
 
-.loginForm form {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
 
 .loginForm h1 {
     color: white;
     text-align: center;
+}
+
+.loginForm button {
+    margin-top: 5px;
+}
+
+.loginForm input {
+    margin-top: 5px;
 }

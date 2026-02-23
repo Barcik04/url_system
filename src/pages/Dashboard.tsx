@@ -8,25 +8,33 @@ import "../css/Dashboard.css"
 
 
 function Dashboard() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
-    
     <div className="dashboard">
-      <h1 className="h1Dashboard">Dashboard</h1>
-      <div className="topBar">
-        <button className="createBtn" onClick={() => setOpen(true)}>
-          Create Url
-        </button>
+      <div className="dashboardInner">
+        <div className="dashboardHeader">
+          <h1 className="h1Dashboard">Dashboard</h1>
+
+          <div className="dashboardButtons">
+            <button className="createBtn" onClick={() => setOpen(true)}>
+              Create Url
+            </button>
+        
+          </div>
+          
+        </div>
+
+        <UrlList />
       </div>
-      <UrlList />
 
       {open && (
         <div className="overlay" onClick={() => setOpen(false)}>
           <div onClick={(e) => e.stopPropagation()}>
             <CreateUrl />
           </div>
-        </div>)}
+        </div>
+      )}
     </div>
   );
 }
