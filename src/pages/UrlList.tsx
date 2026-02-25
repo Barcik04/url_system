@@ -2,6 +2,8 @@ const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { apiFetch } from "../api"
 
+import DeleteUrlButton from "../components/DeleteUrlButton";
+
 import "../css/UrlList.css"
 
 
@@ -53,6 +55,7 @@ function UrlList() {
     const [expired, setExpired] = useState(false);
     const [msg, setMsg] = useState("")
     const [pageData, setPageData] = useState<PageResponse<UrlDto> | null>(null);
+    const [hoveredCode, setHoveredCode] = useState<string | null>(null);
     const SHORT_BASE = import.meta.env.VITE_API_URL;
 
 
@@ -113,7 +116,8 @@ function UrlList() {
                 {!pageData ? (
                     <p>Loading...</p>
                 ) : (
-                    <div className="tableWrap">
+                    <div className="tableAndActions" onMouseLeave={() => setHoveredCode(null)}>
+                        <div className="tableWrap">
                         <table className="table">
                             <thead>
                             <tr>
@@ -127,10 +131,12 @@ function UrlList() {
 
                             <tbody>
                             {pageData.content.map((u) => (
-                                <tr key={u.code}>
-                                <td className="cellLong" title={u.longUrl}> {shorten(u.longUrl)} </td>
+                                <tr key={u.code} onMouseEnter={() => setHoveredCode(u.code)}>
+                                <td className="cellLong" title={u.longUrl}>{shorten(u.longUrl)}</td>
                                 <td className="mono">
-                                    <a href={`${SHORT_BASE}/${u.code}`} target="_blank" rel="noreferrer"> {SHORT_BASE}/{u.code} </a>
+                                    <a href={`${SHORT_BASE}/${u.code}`} target="_blank" rel="noreferrer">
+                                    {SHORT_BASE}/{u.code}
+                                    </a>
                                 </td>
                                 <td className="mono">{fmtDate(u.createdAt)}</td>
                                 <td className="mono">{fmtDate(u.expiresAt)}</td>
@@ -139,6 +145,20 @@ function UrlList() {
                             ))}
                             </tbody>
                         </table>
+                        </div>
+
+                        <div className="deleteColumn">
+                        {pageData.content.map((u) => (
+                            <div 
+                                key={u.code}   
+                                className={`deleteRow ${hoveredCode === u.code ? "show" : ""}`} 
+                                onMouseEnter={() => setHoveredCode(u.code)}
+                                onMouseLeave={() => setHoveredCode(null)}
+                            > 
+                            <DeleteUrlButton code={u.code} onDeleted={displayUrls} />
+                            </div>
+                        ))}
+                        </div>
                     </div>
                 )}
                 </div>

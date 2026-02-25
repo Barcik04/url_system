@@ -4,6 +4,24 @@ import { useNavigate } from "react-router-dom"
 import "../css/Signin.css";
 
 
+function parseJwt(token: string): any | null {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+
+
 function Signin() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -27,9 +45,12 @@ function Signin() {
         return
       }
 
-      setAccessToken(data.accessToken)
-      
-      navigate("/dashboard")
+      setAccessToken(data.accessToken);
+
+      localStorage.setItem("roles", JSON.stringify(data.roles ?? []));
+      localStorage.setItem("username", data.username ?? "");
+
+      navigate("/dashboard");
       setMsg("signin success")
     } catch {
       setMsg("Network error")

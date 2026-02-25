@@ -20,20 +20,21 @@ function Start() {
 
     return (
         <div>
-        <CreateUrl onCreated={setShortUrl} />
+            <h3>Shorten your links here!</h3>
+            <CreateUrl onCreated={setShortUrl} />
 
-        {shortUrl && (
-            <div className="resultBox">
-                <h2>Your short url:</h2>
-                <div className="resultInnerBox">
-                    <a href={shortUrl} target="_blank" rel="noreferrer">{shortUrl} </a>
-                    <button className="copyBtn" onClick={handleCopy}> 
-                        <img src={copy} alt="copy" /> 
-                    </button>
+            {shortUrl && (
+                <div className="resultBox">
+                    <h2>Your short url:</h2>
+                    <div className="resultInnerBox">
+                        <a href={shortUrl} target="_blank" rel="noreferrer">{shortUrl} </a>
+                        <button className="copyBtn" onClick={handleCopy}> 
+                            <img src={copy} alt="copy" /> 
+                        </button>
+                    </div>
+                    {copied && <p className="copiedMsg">Copied!</p>}
                 </div>
-                {copied && <p className="copiedMsg">Copied!</p>}
-            </div>
-        )}
+            )}
         </div>
   );
 }
