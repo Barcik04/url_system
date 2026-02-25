@@ -3,10 +3,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
 import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel"
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Start from "./pages/Start";
 import RequireAuth from "./components/RequireAuth";
+import RequireRole from "./components/RequireRole";
+
 
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
           </RequireAuth>}
         />
         <Route path="/start" element={<Start />} />
+        <Route path="/admin" element={<RequireRole role="ADMIN"><AdminPanel /></RequireRole>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );

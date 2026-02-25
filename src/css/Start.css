@@ -1,3 +1,19 @@
+.h3 {
+    display: flex;
+    justify-content: center;
+    color: azure;
+    font-size: 20px;
+    transform: translateY(-80px);
+}
+
+.siteWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+
+}
+
 .resultBox {
     display: flex;
     flex-direction: column;
@@ -52,5 +68,6 @@
     opacity: 1;
     transform: scale(1.1);
 }
+
 
 

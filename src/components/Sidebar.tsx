@@ -1,5 +1,7 @@
 import "../css/Sidebar.css";
 import { Link, useNavigate } from "react-router-dom";
+import { clearAccessToken } from "../api";
+
 
 type Props = {
   open: boolean;
@@ -12,19 +14,22 @@ function Sidebar({ open, onClose }: Props) {
 
   async function handleLogout() {
     try {
-      const token = localStorage.getItem("accessToken");
-
       await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
         method: "POST",
+        credentials: "include",
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
+          "Content-Type": "application/json",
+          ...(localStorage.getItem("accessToken")
+            ? { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }
+            : {}),
+        },
       });
     } catch (e) {
       console.log("logout request failed (ok)");
     }
 
-    localStorage.removeItem("accessToken");
+    clearAccessToken();
+    localStorage.removeItem("roles");
 
     navigate("/signin");
     onClose();
@@ -46,7 +51,7 @@ function Sidebar({ open, onClose }: Props) {
             </li>
 
             <li>
-              <Link to="/links" onClick={onClose}>Admin</Link>
+              <Link to="/admin" onClick={onClose}>Admin</Link>
             </li>
 
             <li>

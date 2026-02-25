@@ -1,0 +1,156 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 80vh;
+    justify-content: flex-start;
+    padding: 40px 20px;
+}
+
+.tableAndActions {
+  display: flex;
+  align-items: flex-start;
+}
+
+.deleteColumn{
+  margin-top: 54px;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 0px 0px 10px;
+}
+
+.deleteRow{
+  height: 43px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.deleteRow.show{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+.searchBar {
+    display: flex;
+    flex-direction: row;
+    color: white;
+    gap: 24px;
+    margin-bottom: 10px;
+}
+
+.stringSearch {
+  padding: 5px;
+  border-radius: 3px;
+  border: none;
+  background-color: #3B373E;
+}
+
+.isExpiredCheck {
+  display: flex;
+  align-items: center;
+}
+
+.isExpiredInput {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3B373E;
+  cursor: pointer;
+  position: relative;
+}
+
+.isExpiredInput:checked::after {
+  content: "✔";
+  color: azure;
+  position: absolute;
+  font-size: 14px;
+  left: 3px;
+  top: -1px;
+}
+
+.tableWrap {
+  margin-top: 12px;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px; 
+  color: white;
+}
+
+.table th, .table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table a {
+  color: azure;
+}
+
+.table thead th {
+  font-weight: 700;
+  background: #735686;
+}
+
+.table tbody tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cellLong {
+  width: 220px;
+  word-break: break-word; 
+}
+
+
+
+
+
+.deleteBtn {
+  background: rgba(255,0,0,0.08);
+  border: 1px solid rgba(255, 0, 0, 0.062);
+  padding: 5px;
+  border-radius: 25px;
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+}
+
+.deleteBtn img {
+  width: 18px;
+  height: 18px;
+  filter: invert(1);
+  transform: translateY(1.9px);
+  transition: transform 0.18s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(255,0,0,0.18);
+  box-shadow: 0 0 10px rgba(255,0,0,0.4);
+  transform: scale(1.08);
+}
+
+.deleteBtn:hover img {
+  transform: rotate(-15deg) scale(1.1);
+}
+

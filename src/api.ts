@@ -1,16 +1,21 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 
-export function setAccessToken(token: string) {
-  localStorage.setItem("accessToken", token);
-}
+let accessToken: string | null = null;
 
-export function getAccessToken() {
-  return localStorage.getItem("accessToken");
+export function setAccessToken(t: string | null) {
+  accessToken = t;
+  if (t) localStorage.setItem("accessToken", t);
+  else localStorage.removeItem("accessToken");
 }
 
 export function clearAccessToken() {
+  accessToken = null;
   localStorage.removeItem("accessToken");
+}
+
+export function getAccessToken() {
+  return accessToken ?? localStorage.getItem("accessToken");
 }
 
 
@@ -53,7 +58,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   const doFetch = (accessToken: string | null) => {
     return fetch(`${API_URL}${path}`, {
       ...options,
-      credentials: "include", // ważne jeśli cookie
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
