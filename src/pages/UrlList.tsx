@@ -79,6 +79,9 @@ function UrlList() {
                 }),
             });
 
+            if (res.status == 401) {
+                throw new Error(`Please log in to access`);
+            }
 
             if (!res.ok) {
                 const txt = await res.text();

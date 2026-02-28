@@ -9,6 +9,7 @@ import Sidebar from "./components/Sidebar";
 import Start from "./pages/Start";
 import RequireAuth from "./components/RequireAuth";
 import RequireRole from "./components/RequireRole";
+import Settings from "./pages/Settings"
 
 
 
@@ -30,9 +31,12 @@ function App() {
           </RequireAuth>}
         />
         <Route path="/start" element={<Start />} />
-        <Route path="/admin" element={<RequireRole role="ADMIN"><AdminPanel /></RequireRole>
-  }
-/>
+        <Route path="/admin" element={<RequireRole role="ADMIN"><AdminPanel /></RequireRole>}/>
+        <Route path="/settings"element={
+          <RequireAuth>
+            <Settings />
+          </RequireAuth>}
+        />
       </Routes>
     </BrowserRouter>
   );

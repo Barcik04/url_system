@@ -1,0 +1,101 @@
+.settingsWrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(90, 89, 89, 0.2);
+    backdrop-filter: blur(10px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deleteAccountForm {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+
+    padding: 20px 30px 0px 30px;
+    border-radius: 10px;
+    background-color: #0D0C0E;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+
+    width: 100%;
+    width: 500px;
+}
+
+.password {
+    padding: 10px;
+    width: 480px;
+    border-radius: 5px;
+}
+
+h1 {
+    color: azure;
+    font-size: 50px;
+}
+
+.settingsList {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transform: translateX(-10px);
+}
+
+.settingsList li {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.settingsList li a {
+    margin-right: 10px;
+    color: azure;
+}
+
+
+
+
+.deleteAccountBtn {
+  background: rgba(255,0,0,0.08);
+  border: 1px solid rgba(255, 0, 0, 0.062);
+  padding: 5px;
+  border-radius: 25px;
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+}
+
+.deleteAccountBtn img {
+  width: 18px;
+  height: 18px;
+  filter: invert(1);
+  transform: translateY(1.9px);
+  transition: transform 0.18s ease;
+}
+
+.deleteAccountBtn:hover {
+  background: rgba(255,0,0,0.18);
+  box-shadow: 0 0 10px rgba(255,0,0,0.4);
+  transform: scale(1.08);
+}
+
+.deleteAccountBtn:hover img {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+
+.confirmDeleteAccountBtn {
+    padding: 10px;
+    margin: 10px 0 10px 0;
+}

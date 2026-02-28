@@ -20,7 +20,6 @@ function Start() {
 
     return (
         <div>
-            <h3>Shorten your links here!</h3>
             <CreateUrl onCreated={setShortUrl} />
 
             {shortUrl && (
