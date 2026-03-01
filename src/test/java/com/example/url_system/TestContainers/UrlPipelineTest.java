@@ -1,5 +1,7 @@
 package com.example.url_system.TestContainers;
 
+import com.example.url_system.controllers.AvatarControllerV1;
+import com.example.url_system.services.AvatarService;
 import com.example.url_system.utils.emailSender.EmailSender;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -43,7 +45,10 @@ public class UrlPipelineTest {
 
     @MockitoBean
     private EmailSender emailSender;
-
+    @MockitoBean
+    AvatarControllerV1 avatarControllerV1;
+    @MockitoBean
+    AvatarService avatarService;
 
 
     @Container

@@ -70,7 +70,7 @@
         -DEV:
             ```bash
             docker compose -f .\docker-compose.dev.yml up -d --build
-        -PROD:
+        -STAGE:
             ```bash
             docker compose -f .\docker-compose.prod.yml up -d --build
     
@@ -197,7 +197,7 @@
     -- Kafka (email messaging)
     -- Dynamic filtering 
     -- Grafana Alerts
-    
+    -- S3 user avatar image upload
 
 
 

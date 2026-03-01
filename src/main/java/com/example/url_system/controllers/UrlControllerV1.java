@@ -1,12 +1,11 @@
 package com.example.url_system.controllers;
 
-import com.example.url_system.dtos.CreateResponseUrlDto;
-import com.example.url_system.dtos.CreateUrlRequest;
-import com.example.url_system.dtos.StatsUrlDto;
+import com.example.url_system.dtos.*;
 import com.example.url_system.exceptions.ApiError;
 import com.example.url_system.models.Url;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.services.UserService;
 import com.example.url_system.utils.dynamicFiltering.UrlFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,10 +39,12 @@ import java.net.URI;
 public class UrlControllerV1 {
     private final UrlService urlService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UrlControllerV1(UrlService urlService, UserRepository userRepository) {
+    public UrlControllerV1(UrlService urlService, UserRepository userRepository, UserService userService) {
         this.urlService = urlService;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
 
@@ -164,6 +165,7 @@ public class UrlControllerV1 {
 
 
 
+
     @Operation(summary = "Display all urls in the database paged",tags = {"Get All links (ADMIN)"})
     @ApiResponses({
             @ApiResponse(
@@ -171,9 +173,13 @@ public class UrlControllerV1 {
                     description = "Page of found urls"
             )
     })
-    @GetMapping("/api/v1/urls")
+    @PostMapping("/api/v1/all-urls")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public Page<Url> getAllLinks(@PageableDefault(size = 20) Pageable pageable) {
+    public Page<Url> getAllLinks(
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestBody(required = false) UrlFilter filter,
+            @AuthenticationPrincipal UserDetails principal
+            ) {
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -181,7 +187,16 @@ public class UrlControllerV1 {
                 pageable.getSort()
         );
 
-        return urlService.getAllLinks(safePageable);
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        String username = principal.getUsername();
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
+
+        return urlService.getAllLinks(safePageable, filter, userId);
     }
 
 
@@ -219,5 +234,72 @@ public class UrlControllerV1 {
                 .getId();
 
         return urlService.showMyLinks(safePageable, userId, filter);
+    }
+
+
+
+
+    @Operation(summary = "Deleting Url by id",tags = {"delete url"})
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "url deleted"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Url doesnt belong to User",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiError.class))
+            )
+    })
+    @DeleteMapping("/api/v1/delete-url/{code}")
+    @PreAuthorize("hasAuthority('USER')")
+    public void delete(
+            @PathVariable String code,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        String username = principal.getUsername();
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
+
+        urlService.deleteUrl(userId, code);
+    }
+
+
+
+    @DeleteMapping("api/v1/delete-account")
+    public void deleteAcc(@RequestBody DeleteAccountRequest req, @AuthenticationPrincipal UserDetails principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        String username = principal.getUsername();
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
+
+        userService.deleteAccount(userId, req.password());
+    }
+
+
+
+    @PatchMapping("api/v1/patch-url/{code}")
+    public UrlResponseDto patchUrl(@AuthenticationPrincipal UserDetails principal, @PathVariable String code, @RequestBody PatchUrlDto patchUrlDto) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        String username = principal.getUsername();
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
+
+        return urlService.patchUrl(userId, code, patchUrlDto);
     }
 }

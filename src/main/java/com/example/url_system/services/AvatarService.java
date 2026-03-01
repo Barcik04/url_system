@@ -9,6 +9,7 @@ import com.example.url_system.dtos.avatar.UserAvatarResponse;
 import com.example.url_system.models.User;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.utils.config.AvatarsS3Properties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Service
+@Profile("prod & !stage")
 public class AvatarService {
 
     private static final Set<String> ALLOWED_CONTENT_TYPES =

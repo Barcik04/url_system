@@ -9,4 +9,5 @@ public interface UrlMapper {
     StatsUrlDto urlToStatsDto(Url url);
 
     Page<StatsUrlDto> urlToStatsPageDto(Page<Url> urls);
+
 }

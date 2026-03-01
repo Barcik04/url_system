@@ -1,11 +1,13 @@
 package com.example.url_system.TestContainers;
 
 
+import com.example.url_system.controllers.AvatarControllerV1;
 import com.example.url_system.dtos.CreateUrlRequest;
 import com.example.url_system.models.OutboxEvent;
 import com.example.url_system.models.User;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.services.AvatarService;
 import com.example.url_system.services.UrlService;
 import com.example.url_system.utils.emailSender.EmailSender;
 import com.example.url_system.utils.emailSender.OutboxDispatcher;
@@ -46,6 +48,10 @@ class OutboxDispatcherFailurePathsTest {
     @MockitoBean KafkaTemplate<String, String> kafkaTemplate;
 
     @MockitoBean Clock clock;
+    @MockitoBean
+    AvatarControllerV1 avatarControllerV1;
+    @MockitoBean
+    AvatarService avatarService;
 
 
 

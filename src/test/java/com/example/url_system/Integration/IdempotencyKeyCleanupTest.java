@@ -2,6 +2,7 @@ package com.example.url_system.Integration;
 
 import com.example.url_system.models.IdempotencyKeys;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
+import com.example.url_system.services.AvatarService;
 import com.example.url_system.services.IdempotencyKeyService;
 import com.example.url_system.utils.emailSender.EmailSender;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,8 @@ class IdempotencyKeyCleanupTest {
     @MockitoBean
     private EmailSender emailSender;
 
+    @MockitoBean
+    private AvatarService avatarService;
 
     @BeforeEach
     void cleanDb() {
