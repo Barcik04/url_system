@@ -36,7 +36,7 @@ public class CorsConfig implements WebMvcConfigurer {
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of(
                 "Authorization", "Content-Type", "Accept", "Origin",
-                "X-XSRF-TOKEN", "X-CSRF-TOKEN", "Set-Cookie"
+                "X-XSRF-TOKEN", "X-CSRF-TOKEN", "Set-Cookie", "Idempotency-Key"
         ));
         cfg.setAllowCredentials(true);
 

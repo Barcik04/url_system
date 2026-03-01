@@ -6,11 +6,13 @@ import com.example.url_system.dtos.avatar.PresignAvatarUploadResponse;
 import com.example.url_system.dtos.avatar.UserAvatarResponse;
 import com.example.url_system.services.AvatarService;
 import jakarta.validation.Valid;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Profile("prod & !stage")
 @RequestMapping("/api/v1/users/me/avatar")
 public class AvatarControllerV1 {
 

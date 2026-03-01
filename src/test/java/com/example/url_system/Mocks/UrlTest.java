@@ -12,6 +12,7 @@ import com.example.url_system.repositories.UrlRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.security.SecurityConfig;
 import com.example.url_system.services.UrlService;
+import com.example.url_system.services.UserService;
 import com.example.url_system.utils.config.JacksonConfig;
 import com.example.url_system.utils.ratelimit.RateLimitFilter;
 import com.example.url_system.utils.ratelimit.RateLimitService;
@@ -51,6 +52,7 @@ class UrlTest {
     @MockitoBean UrlService urlService;
     @MockitoBean UserRepository userRepository;
     @MockitoBean UrlRepository urlRepository;
+    @MockitoBean UserService userService;
 
     @MockitoBean
     AuthEntryPointJwt authEntryPointJwt;
@@ -106,7 +108,7 @@ class UrlTest {
                         .header("Idempotency-Key", "123dak")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createUrlRequest)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
     }
 
@@ -166,21 +168,33 @@ class UrlTest {
     @Test
     @WithMockUser(username = "igor", authorities = {"ADMIN"})
     void should_return_200_when_get_all_link() throws Exception {
-        mockMvc.perform(get("/api/v1/urls")
+        String username = "igor";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        mockMvc.perform(post("/api/v1/all-urls")
                 .param("page", "0")
                 .param("size", "2"))
                 .andExpect(status().isOk());
+
+        verify(userRepository, times(1)).findByUsername(username);
     }
+
 
 
     @Test
     @WithMockUser(username = "igor", authorities = {"USER"})
     void should_return_403_when_get_all_link_and_user() throws Exception {
-        mockMvc.perform(get("/api/v1/urls")
+        mockMvc.perform(post("/api/v1/all-urls")
                 .param("page", "0")
                 .param("size", "2"))
                 .andExpect(status().isForbidden());
     }
+
 
 
     @Test

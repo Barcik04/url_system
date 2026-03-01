@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.*;
 import java.util.HashSet;
@@ -262,4 +262,47 @@ public class IntegrationTest {
         assertEquals(2, longUrls.stream().filter("https//12312312waawd"::equals).count());
     }
 
+
+
+    @Test
+    @Transactional
+    void shouldDeleteUserUrlSuccessfully() {
+        User user = new User("igor.b4b00@gmail.com", "12345678", Role.USER);
+        userRepository.save(user);
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//igoraawd", null);
+        CreateResponseUrlDto url = urlService.create(createUrlRequest, user.getId(), "123");
+
+        Url savedUrl = urlRepository.findByCode(url.shortUrl()).orElseThrow();
+
+        assertThat(urlRepository.findAll().size()).isEqualTo(1);
+        assertThat(urlRepository.findAll().stream().anyMatch(a -> a.getLongUrl().equals("https//igoraawd")));
+
+        urlService.deleteUrl(user.getId(), savedUrl.getCode());
+
+        assertThat(urlRepository.findAll().size()).isEqualTo(0);
+    }
+
+
+    @Test
+    @Transactional
+    void ShuoldThrowIllegalArgumentException_whenDeleteUrl_andUrlDoesNotBelongToUser() {
+        User user = new User("igor.b4b00@gmail.com", "12345678", Role.USER);
+        userRepository.save(user);
+
+        User user1 = new User("igor.b00@gmail.com", "12345678", Role.USER);
+        userRepository.save(user1);
+
+
+        CreateUrlRequest createUrlRequest = new CreateUrlRequest("https//igoraawd", null);
+        CreateResponseUrlDto url = urlService.create(createUrlRequest, user.getId(), "123");
+
+        Url savedUrl = urlRepository.findByCode(url.shortUrl()).orElseThrow();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            urlService.deleteUrl(user1.getId(), savedUrl.getCode());
+        });
+
+        assertThat(urlRepository.findAll().size()).isEqualTo(1);
+    }
 }

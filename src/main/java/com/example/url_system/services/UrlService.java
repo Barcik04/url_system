@@ -47,7 +47,7 @@ public class UrlService {
     private final UrlMapper urlMapper;
     private final UserRepository userRepository;
     private final IdempotencyKeyRepository idempotencyKeyRepository;
-    private final RedisCacheClient redisCacheClient;
+//    private final RedisCacheClient redisCacheClient;
     private final OutboxEventRepository outboxEventRepository;
     private final ObjectMapper objectMapper;
     private final Clock clock;
@@ -60,7 +60,7 @@ public class UrlService {
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
         this.idempotencyKeyRepository = idempotencyKeyRepository;
-        this.redisCacheClient = redisCacheClient;
+//        this.redisCacheClient = redisCacheClient;
         this.outboxEventRepository = outboxEventRepository;
         this.objectMapper = objectMapper;
         this.clock = clock;
@@ -224,23 +224,31 @@ public class UrlService {
     @Transactional(readOnly = true)
     public StatsUrlDto getStatsUrl(String code, Long userId) {
 
-        String cacheKey = "stats:user:" + userId + ":code:" + code;
+//        String cacheKey = "stats:user:" + userId + ":code:" + code;
+//
+//        return redisCacheClient.get(cacheKey, StatsUrlDto.class)
+//                        .orElseGet(() -> {
+//                            userRepository.findById(userId)
+//                                    .orElseThrow(() -> new NoSuchElementException("User not found"));
+//
+//
+//                            Url url = urlRepository.findByCodeAndUser_Id(code, userId)
+//                                    .orElseThrow(() -> new NoSuchElementException("Url not found"));
+//
+//                            StatsUrlDto dto = urlMapper.urlToStatsDto(url);
+//
+//                            redisCacheClient.set(cacheKey, dto, Duration.ofSeconds(30));
+//
+//                            return dto;
+//                        });
 
-        return redisCacheClient.get(cacheKey, StatsUrlDto.class)
-                        .orElseGet(() -> {
-                            userRepository.findById(userId)
-                                    .orElseThrow(() -> new NoSuchElementException("User not found"));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
+        Url url = urlRepository.findByCodeAndUser_Id(code, userId)
+                .orElseThrow(() -> new NoSuchElementException("Url not found"));
 
-                            Url url = urlRepository.findByCodeAndUser_Id(code, userId)
-                                    .orElseThrow(() -> new NoSuchElementException("Url not found"));
-
-                            StatsUrlDto dto = urlMapper.urlToStatsDto(url);
-
-                            redisCacheClient.set(cacheKey, dto, Duration.ofSeconds(30));
-
-                            return dto;
-                        });
+        return urlMapper.urlToStatsDto(url);
     }
 
 
@@ -253,8 +261,29 @@ public class UrlService {
     @Bulkhead(name = "baseService")
     @CircuitBreaker(name = "baseService")
     @Transactional(readOnly = true)
-    public Page<Url> getAllLinks(Pageable pageable) {
-        return urlRepository.findAll(pageable);
+    public Page<Url> getAllLinks(Pageable pageable, UrlFilter filter, Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("user not found"));
+
+        if (filter == null) {
+            return urlRepository.findAll(pageable);
+        }
+
+        Specification<Url> spec = Specification.allOf();
+
+        Specification<Url> text = UrlSpecs.textSearch(filter.q());
+        if (text != null) {
+            spec = spec.and(text);
+        }
+
+        Specification<Url> exp = UrlSpecs.expired(filter.expired(), clock);
+        if (exp != null) {
+            spec = spec.and(exp);
+        }
+
+
+        Pageable safePageable = sanitizeSort(pageable);
+        return urlRepository.findAll(spec, safePageable);
     }
 
 
@@ -300,6 +329,10 @@ public class UrlService {
     }
 
 
+
+
+
+
     private Pageable sanitizeSort(Pageable pageable) {
         var allowed = Set.of("clicks", "expiresAt", "createdAt");
 
@@ -311,4 +344,68 @@ public class UrlService {
     }
 
 
+    /**
+     * Method for deleting urls
+     *
+     * @param userId Id of an authenticated user
+     * @param code url code (shortUrl)
+     */
+    @Transactional
+    public void deleteUrl(Long userId, String code) {
+        if (userId == null || code == null || code.isBlank()) {
+            throw new IllegalArgumentException("userId/code can't be null");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("user not found"));
+
+        Url url = urlRepository.findByCode(code)
+                .orElseThrow(() -> new NoSuchElementException("url not found"));
+
+
+        if (user.getRole().equals(Role.ADMIN)) {
+            urlRepository.deleteByCode(url.getCode());
+        } else {
+            if (url.getUser() == null) {
+                throw new IllegalStateException("This url does not belong to the user");
+            }
+
+            if ((!url.getUser().getId().equals(user.getId()))) {
+                throw new IllegalArgumentException("No permission to delete url");
+            } else {
+                urlRepository.deleteByCodeAndUser_Id(url.getCode(), user.getId());
+            }
+        }
+    }
+
+
+    /**
+     * Method for patching urls
+     *
+     * @param userId id of an authenticated user
+     * @param code shortUrl of url to patch
+     * @param patchUrlDto Dto request of url to patch
+     * @return {@link UrlResponseDto}
+     */
+    public UrlResponseDto patchUrl(Long userId, String code, PatchUrlDto patchUrlDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("user not found"));
+
+        Url url = urlRepository.findByCode(code)
+                .orElseThrow(() -> new NoSuchElementException("Url not found"));
+
+        if (user.getRole().equals(Role.ADMIN)) {
+            if (patchUrlDto.longUrl() != null && !patchUrlDto.longUrl().isBlank()) { url.setLongUrl(patchUrlDto.longUrl()); }
+            if (patchUrlDto.expiredAt() != null) { url.setExpiresAt(patchUrlDto.expiredAt()); }
+            return urlMapper.urlToDto(urlRepository.save(url));
+        }
+
+        if (urlRepository.findAllByUser_Id(userId).stream().noneMatch(a -> a.getCode().equals(code))) {
+            throw new NoSuchElementException("Url with code {" + code + "} does not belong to the user");
+        }
+
+        if (patchUrlDto.longUrl() != null && !patchUrlDto.longUrl().isBlank()) { url.setLongUrl(patchUrlDto.longUrl()); }
+        if (patchUrlDto.expiredAt() != null) { url.setExpiresAt(patchUrlDto.expiredAt()); }
+        return urlMapper.urlToDto(urlRepository.save(url));
+    }
 }

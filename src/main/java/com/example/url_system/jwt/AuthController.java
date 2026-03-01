@@ -1,6 +1,7 @@
 package com.example.url_system.jwt;
 
 import com.example.url_system.dtos.CreateResponseUrlDto;
+import com.example.url_system.dtos.DeleteAccountRequest;
 import com.example.url_system.dtos.OutboxPayloadDto;
 import com.example.url_system.exceptions.ApiError;
 import com.example.url_system.models.OutboxEvent;
@@ -9,6 +10,7 @@ import com.example.url_system.models.User;
 import com.example.url_system.repositories.OutboxEventRepository;
 import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.EmailVerificationService;
+import com.example.url_system.services.UserService;
 import com.example.url_system.utils.emailSender.OutboxDispatcher;
 import com.example.url_system.utils.redis.RedisCacheClient;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,16 +28,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.Duration;
@@ -292,6 +297,9 @@ public class AuthController {
                 })
                 .orElseGet(() -> ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token")));
     }
+
+
+
 
 
 
