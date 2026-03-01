@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { apiFetch } from "../api"
 import CreateUrl from "./CreateUrl"
 import DeleteUrlButton from "../components/DeleteUrlButton";
+import PatchUrlBtn from "../components/PatchUrlBtn";
 
 import "../css/AdminPanel.css"
 
@@ -184,7 +185,10 @@ function UrlList() {
                                     onMouseEnter={() => setHoveredCode(u.code)}
                                     onMouseLeave={() => setHoveredCode(null)}
                                 > 
-                                <DeleteUrlButton code={u.code} onDeleted={displayUrls} />
+                                <ul>
+                                    <li> <DeleteUrlButton code={u.code} onDeleted={displayUrls} /></li>
+                                    <li> <PatchUrlBtn code={u.code} onDeleted={displayUrls} /></li>
+                                </ul>
                                 </div>
                             ))}
                             </div>
