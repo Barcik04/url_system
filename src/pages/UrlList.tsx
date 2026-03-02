@@ -2,7 +2,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { apiFetch } from "../api"
 
+import CreateUrl from "./CreateUrl"
 import DeleteUrlButton from "../components/DeleteUrlButton";
+import PatchUrlForm from "../components/PatchUrlForm";
+import edit from "../photos/edit.png"
+
 
 import "../css/UrlList.css"
 
@@ -49,6 +53,28 @@ function fmtDate(iso: string | null | undefined) {
 }
 
 
+function getPageItems(current: number, totalPages: number) {
+  const last = totalPages - 1;
+  if (totalPages <= 7) return [...Array(totalPages)].map((_, i) => i);
+
+  const items: (number | "dots")[] = [];
+  const windowStart = Math.max(1, current - 1);
+  const windowEnd = Math.min(last - 1, current + 1);
+
+  items.push(0);
+
+  if (windowStart > 1) items.push("dots");
+
+  for (let i = windowStart; i <= windowEnd; i++) items.push(i);
+
+  if (windowEnd < last - 1) items.push("dots");
+
+  items.push(last);
+
+  return items;
+}
+
+
 
 function UrlList() {
     const [q, setQ] = useState("");
@@ -57,9 +83,12 @@ function UrlList() {
     const [pageData, setPageData] = useState<PageResponse<UrlDto> | null>(null);
     const [hoveredCode, setHoveredCode] = useState<string | null>(null);
     const SHORT_BASE = import.meta.env.VITE_API_URL;
+    const [open, setOpen] = useState(false);
+    const [patchOpen, setPatchOpen] = useState(false);
+    const [patchCode, setPatchCode] = useState<string | null>(null);
 
 
-    const page = 0;
+    const [page, setPage] = useState(0);
     const size = 10;
 
     const [debouncedQ, setDebouncedQ] = useState(q);
@@ -98,9 +127,15 @@ function UrlList() {
         }
     }
 
+    
+    useEffect(() => {
+        setPage(0);
+    }, [debouncedQ, expired]);
+
     useEffect(() => {
         displayUrls();
-    }, [debouncedQ, expired]); 
+    }, [debouncedQ, expired, page]);
+
 
     return (
         <div>
@@ -113,6 +148,7 @@ function UrlList() {
                     </label>
                 
                 </div>
+
 
                 {msg && <p>{msg}</p>}
 
@@ -158,13 +194,78 @@ function UrlList() {
                                 onMouseEnter={() => setHoveredCode(u.code)}
                                 onMouseLeave={() => setHoveredCode(null)}
                             > 
-                            <DeleteUrlButton code={u.code} onDeleted={displayUrls} />
+                                <ul>
+                                    <li> <DeleteUrlButton code={u.code} onDeleted={displayUrls} /></li>
+                                    <li>
+                                        <button
+                                            className="patchBtn"
+                                            onClick={() => {
+                                                setPatchCode(u.code);
+                                                setPatchOpen(true);
+                                            }}
+                                            >
+                                            <img src={edit} alt="edit" />
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
                         ))}
                         </div>
                     </div>
                 )}
+
+
+                            
+            {pageData && (
+                <div className="paginationBar">
+                    <button
+                    className="pageBtn"
+                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                    disabled={pageData.first}
+                    >
+                    Prev
+                    </button>
+
+                    {getPageItems(pageData.number, pageData.totalPages).map((it, idx) =>
+                    it === "dots" ? (
+                        <span key={`dots-${idx}`} className="dots">...</span>
+                    ) : (
+                        <button
+                        key={it}
+                        className={`pageBtn ${it === pageData.number ? "active" : ""}`}
+                        onClick={() => setPage(it)}
+                        >
+                        {it + 1}
+                        </button>
+                    )
+                    )}
+
+                    <button
+                    className="pageBtn"
+                    onClick={() => setPage(p => Math.min(pageData.totalPages - 1, p + 1))}
+                    disabled={pageData.last}
+                    >
+                    Next
+                    </button>
                 </div>
+            )}
+            </div>
+            
+            {patchOpen && patchCode && (
+                <div className="overlay" onClick={() => { setPatchOpen(false); setPatchCode(null); }}>
+                    <div onClick={(e) => e.stopPropagation()}>
+                    <PatchUrlForm
+                        code={patchCode}
+                        onClose={() => { setPatchOpen(false); setPatchCode(null); }}
+                        onSuccess={() => {
+                        setPatchOpen(false);
+                        setPatchCode(null);
+                        displayUrls();
+                        }}
+                    />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -36,10 +36,8 @@ function Signup() {
 
             <form onSubmit={handleSubmit}>
                 <input placeholder="email" value={username} onChange={(e) => setUsername(e.target.value)}/>
-                <br />
 
                 <input placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
-                <br />
 
                 <button type="submit">Create account</button>
                 <button type="button" onClick={() => navigate("/signin")}>Go to Sign in</button>

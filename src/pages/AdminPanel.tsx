@@ -3,8 +3,10 @@ import { useEffect, useState } from "react"
 import { apiFetch } from "../api"
 import CreateUrl from "./CreateUrl"
 import DeleteUrlButton from "../components/DeleteUrlButton";
+import PatchUrlForm from "../components/PatchUrlForm";
 
 import "../css/AdminPanel.css"
+import edit from "../photos/edit.png"
 
 
 
@@ -51,6 +53,29 @@ function fmtDate(iso: string | null | undefined) {
 
 
 
+function getPageItems(current: number, totalPages: number) {
+  const last = totalPages - 1;
+  if (totalPages <= 7) return [...Array(totalPages)].map((_, i) => i);
+
+  const items: (number | "dots")[] = [];
+  const windowStart = Math.max(1, current - 1);
+  const windowEnd = Math.min(last - 1, current + 1);
+
+  items.push(0);
+
+  if (windowStart > 1) items.push("dots");
+
+  for (let i = windowStart; i <= windowEnd; i++) items.push(i);
+
+  if (windowEnd < last - 1) items.push("dots");
+
+  items.push(last);
+
+  return items;
+}
+
+
+
 function UrlList() {
     const [q, setQ] = useState("");
     const [expired, setExpired] = useState(false);
@@ -59,9 +84,11 @@ function UrlList() {
     const SHORT_BASE = import.meta.env.VITE_API_URL;
     const [open, setOpen] = useState(false);
     const [hoveredCode, setHoveredCode] = useState<string | null>(null);
+    const [patchOpen, setPatchOpen] = useState(false);
+    const [patchCode, setPatchCode] = useState<string | null>(null);
 
 
-    const page = 0;
+    const [page, setPage] = useState(0);
     const size = 10;
 
     const [debouncedQ, setDebouncedQ] = useState(q);
@@ -101,31 +128,49 @@ function UrlList() {
     }
 
     useEffect(() => {
+        setPage(0);
+    }, [debouncedQ, expired]);
+
+    useEffect(() => {
         displayUrls();
-    }, [debouncedQ, expired]); 
+    }, [debouncedQ, expired, page]);
 
     return (
         <div>
             <div className="dashboard">
                 <div className="dashboardInner">
                     <div className="dashboardHeader">
-                    <h1 className="h1Dashboard">Admin Panel</h1>
+                        <h1 className="h1Dashboard">Admin Panel</h1>
 
-                    <div className="dashboardButtons">
-                        <button className="createBtn" onClick={() => setOpen(true)}>
-                        Create Url
-                        </button>
-                    
+                        <div className="dashboardButtons">
+                            <button className="createBtn" onClick={() => setOpen(true)}>
+                            Create Url
+                            </button>
+                        
+                        </div>
                     </div>
-                    
-                </div>
-                    
                 </div>
 
                 {open && (
                     <div className="overlay" onClick={() => setOpen(false)}>
                         <div onClick={(e) => e.stopPropagation()}>
                             <CreateUrl />
+                        </div>
+                    </div>
+                )}
+
+                {patchOpen && patchCode && (
+                    <div className="overlay" onClick={() => { setPatchOpen(false); setPatchCode(null); }}>
+                        <div onClick={(e) => e.stopPropagation()}>
+                        <PatchUrlForm
+                            code={patchCode}
+                            onClose={() => { setPatchOpen(false); setPatchCode(null); }}
+                            onSuccess={() => {
+                            setPatchOpen(false);
+                            setPatchCode(null);
+                            displayUrls();
+                            }}
+                        />
                         </div>
                     </div>
                 )}
@@ -184,7 +229,20 @@ function UrlList() {
                                     onMouseEnter={() => setHoveredCode(u.code)}
                                     onMouseLeave={() => setHoveredCode(null)}
                                 > 
-                                <DeleteUrlButton code={u.code} onDeleted={displayUrls} />
+                                    <ul>
+                                        <li> <DeleteUrlButton code={u.code} onDeleted={displayUrls} /></li>
+                                        <li>
+                                            <button
+                                                className="patchBtn"
+                                                onClick={() => {
+                                                    setPatchCode(u.code);
+                                                    setPatchOpen(true);
+                                                }}
+                                                >
+                                                <img src={edit} alt="edit" />
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
                             ))}
                             </div>
@@ -192,6 +250,40 @@ function UrlList() {
 
                     )}
                     </div>
+
+                    {pageData && (
+                        <div className="paginationBar">
+                            <button
+                            className="pageBtn"
+                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                            disabled={pageData.first}
+                            >
+                            Prev
+                            </button>
+
+                            {getPageItems(pageData.number, pageData.totalPages).map((it, idx) =>
+                            it === "dots" ? (
+                                <span key={`dots-${idx}`} className="dots">...</span>
+                            ) : (
+                                <button
+                                key={it}
+                                className={`pageBtn ${it === pageData.number ? "active" : ""}`}
+                                onClick={() => setPage(it)}
+                                >
+                                {it + 1}
+                                </button>
+                            )
+                            )}
+
+                            <button
+                            className="pageBtn"
+                            onClick={() => setPage(p => Math.min(pageData.totalPages - 1, p + 1))}
+                            disabled={pageData.last}
+                            >
+                            Next
+                            </button>
+                        </div>
+                        )}
                 </div>
         </div>
     )

@@ -6,16 +6,24 @@
     padding: 40px 20px;
 }
 
+.urlList {
+  transform: translateX(20px);
+}
+
 .tableAndActions {
   display: flex;
   align-items: flex-start;
+  justify-content: center;
+  min-height: 520px;
 }
 
 .deleteColumn{
-  margin-top: 54px;
+  width: 64px;   
+  flex: 0 0 64px; 
   display: flex;
   flex-direction: column;
   padding: 0px 0px 0px 10px;
+  transform: translateY(52px);
 }
 
 .deleteRow{
@@ -27,9 +35,19 @@
   transition: opacity 0.12s ease;
 }
 
+
 .deleteRow.show{
   opacity: 1;
   pointer-events: auto;
+}
+
+.deleteRow ul {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 
@@ -76,6 +94,8 @@
 .tableWrap {
   margin-top: 12px;
   overflow: auto;
+  width: 100%;
+  max-width: 1000px;  
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.12);
 }
@@ -144,6 +164,8 @@
   transition: transform 0.18s ease;
 }
 
+
+
 .deleteBtn:hover {
   background: rgba(255,0,0,0.18);
   box-shadow: 0 0 10px rgba(255,0,0,0.4);
@@ -154,3 +176,71 @@
   transform: rotate(-15deg) scale(1.1);
 }
 
+
+.patchBtn {
+  background: rgba(129, 112, 112, 0.08);
+  border: 1px solid rgba(201, 161, 161, 0.062);
+  padding: 5px;
+  border-radius: 25px;
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+}
+
+.patchBtn img {
+  width: 18px;
+  height: 18px;
+  filter: invert(1);
+  transform: translateY(1.9px);
+  transition: transform 0.18s ease;
+}
+
+.patchBtn:hover {
+  background: rgba(116, 103, 103, 0.18);
+  box-shadow: 0 0 10px rgba(182, 155, 155, 0.4);
+  transform: scale(1.08);
+}
+
+.patchBtn:hover img {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+
+
+
+
+
+
+/* PAGE REQUEST BAR */
+.paginationBar{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-bottom: 10px;
+}
+
+.pageBtn{
+  background: #735686;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: azure;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled{
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtn.active{
+  border-color: rgba(255,255,255,0.7);
+  transform: translateY(-2px);
+}
+
+.dots{
+  color: rgba(255,255,255,0.6);
+  padding: 0 4px;
+}
