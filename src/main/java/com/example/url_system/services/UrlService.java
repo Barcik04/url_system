@@ -55,7 +55,7 @@ public class UrlService {
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, Clock clock) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository /*RedisCacheClient redisCacheClient*/, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, Clock clock) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
