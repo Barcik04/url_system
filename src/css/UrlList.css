@@ -86,3 +86,39 @@
   width: 220px;
   word-break: break-word; 
 }
+
+
+
+/* PAGE REQUEST BAR */
+.paginationBar{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-bottom: 10px;
+}
+
+.pageBtn{
+  background: #735686;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: azure;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled{
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtn.active{
+  border-color: rgba(255,255,255,0.7);
+  transform: translateY(-2px);
+}
+
+.dots{
+  color: rgba(255,255,255,0.6);
+  padding: 0 4px;
+}
