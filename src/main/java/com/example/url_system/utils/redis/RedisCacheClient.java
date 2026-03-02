@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.Optional;
 
 @Component
-@Profile("stage")
 public class RedisCacheClient {
 
     private final StringRedisTemplate redis;

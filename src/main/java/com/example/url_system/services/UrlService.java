@@ -47,7 +47,7 @@ public class UrlService {
     private final UrlMapper urlMapper;
     private final UserRepository userRepository;
     private final IdempotencyKeyRepository idempotencyKeyRepository;
-//    private final RedisCacheClient redisCacheClient;
+    private final RedisCacheClient redisCacheClient;
     private final OutboxEventRepository outboxEventRepository;
     private final ObjectMapper objectMapper;
     private final Clock clock;
@@ -55,12 +55,12 @@ public class UrlService {
 
     private final SecureRandom random = new SecureRandom();
 
-    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository /*RedisCacheClient redisCacheClient*/, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, Clock clock) {
+    public UrlService(UrlRepository urlRepository, UrlMapper urlMapper, UserRepository userRepository, IdempotencyKeyRepository idempotencyKeyRepository, RedisCacheClient redisCacheClient, OutboxEventRepository outboxEventRepository, ObjectMapper objectMapper, Clock clock) {
         this.urlRepository = urlRepository;
         this.urlMapper = urlMapper;
         this.userRepository = userRepository;
         this.idempotencyKeyRepository = idempotencyKeyRepository;
-//        this.redisCacheClient = redisCacheClient;
+        this.redisCacheClient = redisCacheClient;
         this.outboxEventRepository = outboxEventRepository;
         this.objectMapper = objectMapper;
         this.clock = clock;
@@ -224,31 +224,23 @@ public class UrlService {
     @Transactional(readOnly = true)
     public StatsUrlDto getStatsUrl(String code, Long userId) {
 
-//        String cacheKey = "stats:user:" + userId + ":code:" + code;
-//
-//        return redisCacheClient.get(cacheKey, StatsUrlDto.class)
-//                        .orElseGet(() -> {
-//                            userRepository.findById(userId)
-//                                    .orElseThrow(() -> new NoSuchElementException("User not found"));
-//
-//
-//                            Url url = urlRepository.findByCodeAndUser_Id(code, userId)
-//                                    .orElseThrow(() -> new NoSuchElementException("Url not found"));
-//
-//                            StatsUrlDto dto = urlMapper.urlToStatsDto(url);
-//
-//                            redisCacheClient.set(cacheKey, dto, Duration.ofSeconds(30));
-//
-//                            return dto;
-//                        });
+        String cacheKey = "stats:user:" + userId + ":code:" + code;
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        return redisCacheClient.get(cacheKey, StatsUrlDto.class)
+                        .orElseGet(() -> {
+                            userRepository.findById(userId)
+                                    .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        Url url = urlRepository.findByCodeAndUser_Id(code, userId)
-                .orElseThrow(() -> new NoSuchElementException("Url not found"));
 
-        return urlMapper.urlToStatsDto(url);
+                            Url url = urlRepository.findByCodeAndUser_Id(code, userId)
+                                    .orElseThrow(() -> new NoSuchElementException("Url not found"));
+
+                            StatsUrlDto dto = urlMapper.urlToStatsDto(url);
+
+                            redisCacheClient.set(cacheKey, dto, Duration.ofSeconds(30));
+
+                            return dto;
+                        });
     }
 
 
