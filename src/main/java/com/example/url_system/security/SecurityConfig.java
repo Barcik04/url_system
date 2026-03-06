@@ -31,6 +31,7 @@ public class SecurityConfig {
                                      AuthTokenFilter jwt,
                                      AuthEntryPointJwt entry) throws Exception {
         http
+                .cors(cors -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
