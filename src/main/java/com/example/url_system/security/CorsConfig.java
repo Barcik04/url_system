@@ -25,7 +25,8 @@ public class CorsConfig implements WebMvcConfigurer {
             "http://localhost:63342",
             "http://127.0.0.1:63343",
             "http://localhost:3000",
-            "http://localhost:5173"
+            "http://localhost:5173",
+            "https://app.barcikowskibackend.dev"
     );
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
