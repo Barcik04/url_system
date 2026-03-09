@@ -8,6 +8,7 @@ import com.example.url_system.services.AvatarService;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class AvatarControllerV1 {
     }
 
     @PostMapping("/presign")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<PresignAvatarUploadResponse> presign(
             @Valid @RequestBody PresignAvatarUploadRequest req,
             Authentication authentication
