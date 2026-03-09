@@ -1,3 +1,4 @@
+<img width="1263" height="675" alt="image" src="https://github.com/user-attachments/assets/b653d84a-a6a2-4bf5-9706-e74ab13fbe7e" />
 ### ABOUT
     This project is a URL shortening platform built as a REST API.
     
