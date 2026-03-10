@@ -9,10 +9,12 @@ import bin from "../photos/bin.png";
 function Settings() {
     const [open, setOpen] = useState(false);
 
+    const token = localStorage.getItem("token") || "";
+
     return (
         <div className="settingsWrap">
              <div className="avatarTopSection">
-                <AvatarUpload />
+                <AvatarUpload token={token} />
             </div>
 
             <h1>Settings</h1>
