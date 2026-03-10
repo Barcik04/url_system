@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import "../css/Signup.css";
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling";
 
 function Signup() {
     const [username, setUsername] = useState("")
@@ -20,13 +21,16 @@ function Signup() {
                 body: JSON.stringify({username, password}),
             })
 
-            const data = await res.json()
-            setMsg("account created")
-            console.log(data)
+            if (!res.ok) {
+                setMsg(await getApiErrorMessage(res, "Account creation failed."))
+                return
+            }
 
-        } catch (err) {
-            setMsg("Error during register")
-            
+            await res.json().catch(() => null)
+            setMsg("Account created successfully.")
+
+        } catch {
+            setMsg(getNetworkErrorMessage())
         }
     }
 

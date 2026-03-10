@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling";
 
 import "../css/AdminPanel.css"
 
@@ -45,13 +46,13 @@ export default function PatchUrlBtn({ code }: Props) {
             });
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                throw new Error(txt || `HTTP ${res.status}`);
+                setMsg(await getApiErrorMessage(res, "Failed to update the URL."));
+                return;
             }
             
-            setMsg("Patch Success")
-            } catch (e: any) {
-            setMsg(e?.message ?? "Patch failed");
+            setMsg("URL updated successfully.")
+            } catch {
+            setMsg(getNetworkErrorMessage());
             }
     }
 

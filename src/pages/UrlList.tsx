@@ -1,6 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { apiFetch } from "../api"
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling"
 
 import CreateUrl from "./CreateUrl"
 import DeleteUrlButton from "../components/DeleteUrlButton";
@@ -108,13 +109,9 @@ function UrlList() {
                 }),
             });
 
-            if (res.status == 401) {
-                throw new Error(`Please log in to access`);
-            }
-
             if (!res.ok) {
-                const txt = await res.text();
-                throw new Error(`HTTP ${res.status}: ${txt}`);
+                setMsg(await getApiErrorMessage(res, "Unable to load your URLs."));
+                return;
             }
 
             const data: PageResponse<UrlDto> = await res.json();
@@ -123,7 +120,7 @@ function UrlList() {
             setMsg("");
         } catch(e) {
             console.error(e);
-            setMsg("Error loading your urls")
+            setMsg(getNetworkErrorMessage())
         }
     }
 

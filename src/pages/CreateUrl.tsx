@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { apiFetch } from "../api"
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling"
 import "../css/CreateUrl.css";
 
 function newIdempotencyKey() {
@@ -30,19 +31,18 @@ function CreateUrl({ onCreated }: Props) {
             })
 
 
-            const data = await res.json().catch(() => null)
-
             if (!res.ok) {
-                setMsg(data?.message ?? `Creation Failed (${res.status})`)
+                setMsg(await getApiErrorMessage(res, "Failed to create short URL."))
                 return
             }
 
-            setMsg("Creation Success")
+            const data = await res.json()
+            setMsg("Short URL created successfully.")
             setIdempotencyKey(newIdempotencyKey())
             const short = `${import.meta.env.VITE_API_URL}/${data.shortUrl}`;
             onCreated?.(short);
         } catch(e) {
-            setMsg("Network error")
+            setMsg(getNetworkErrorMessage())
             console.log(e)
         }
     }
