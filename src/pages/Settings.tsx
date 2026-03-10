@@ -13,12 +13,10 @@ function Settings() {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        console.info("settings useEffect works")
         async function loadAvatar() {
             try {
                 const result = await getMyAvatar();
                 setAvatarUrl(result.avatarUrl);
-                console.info("settings useEffect works111")
             } catch (error) {
                 console.error("Load avatar failed:", error);
             }
@@ -29,7 +27,6 @@ function Settings() {
 
     return (
         <div className="settingsWrap">
-            <h1 style={{ color: "red" }}>NOWY BUILD SETTINGS</h1>
             <div className="avatarTopSection">
                 <AvatarUpload
                     currentAvatarUrl={avatarUrl}
