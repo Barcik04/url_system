@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling";
 
 import "../css/Settings.css"
 
@@ -22,14 +23,14 @@ export default function DeleteAccountBtn() {
             });
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                throw new Error(txt || `HTTP ${res.status}`);
+                setMsg(await getApiErrorMessage(res, "Failed to delete account."));
+                return;
             }
 
-            setMsg("Deletion Success")
+            setMsg("Account deleted successfully.")
             console.log("sucess")
             } catch (e: any) {
-              setMsg("error")
+              setMsg(getNetworkErrorMessage())
               console.log(e)
             }
     }
@@ -39,6 +40,7 @@ export default function DeleteAccountBtn() {
             <h1>Delete Account</h1>
             <input className="password" value={password} placeholder="Insert your password" onChange={(e) => setPassword(e.target.value)}/>
             <button className="confirmDeleteAccountBtn" type="submit" disabled={!password}>Confirm Delete</button>
+            <p>{msg}</p>
         </form>
     )
 }

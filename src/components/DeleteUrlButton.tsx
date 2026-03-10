@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling";
 
 import "../css/AdminPanel.css"
 
@@ -28,13 +29,13 @@ export default function DeleteUrlButton({ code, onDeleted }: Props) {
             });
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => "");
-                throw new Error(txt || `HTTP ${res.status}`);
+                setErr(await getApiErrorMessage(res, "Failed to delete URL."));
+                return;
             }
 
             onDeleted?.();
-            } catch (e: any) {
-            setErr(e?.message ?? "Delete failed");
+            } catch {
+            setErr(getNetworkErrorMessage());
             } finally {
             setLoading(false);
             }
@@ -45,6 +46,7 @@ export default function DeleteUrlButton({ code, onDeleted }: Props) {
             <button className="deleteBtn" onClick={handleDelete} disabled={loading}>
                 {loading ? "Deleting..." : <img src={bin} alt="bin" />}
             </button>
+            {err && <p>{err}</p>}
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { apiFetch, setAccessToken } from "../api"
+import { getApiErrorMessage, getNetworkErrorMessage } from "../errorHandling"
 import { useNavigate } from "react-router-dom"
 import "../css/Signin.css";
 
@@ -38,13 +39,12 @@ function Signin() {
         body: JSON.stringify({ username, password }),
       })
 
-      const data = await res.json().catch(() => null)
-
       if (!res.ok) {
-        setMsg(data?.message ?? `Signin failed (${res.status})`)
+        setMsg(await getApiErrorMessage(res, "Sign in failed."))
         return
       }
 
+      const data = await res.json()
       setAccessToken(data.accessToken);
 
       localStorage.setItem("roles", JSON.stringify(data.roles ?? []));
@@ -53,7 +53,7 @@ function Signin() {
       navigate("/dashboard");
       setMsg("signin success")
     } catch {
-      setMsg("Network error")
+      setMsg(getNetworkErrorMessage())
     }
   }
 
