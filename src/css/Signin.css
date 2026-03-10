@@ -52,3 +52,18 @@ body {
 }
 
 
+.signin-msg {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 24px;
+}
+
+.signin-msg.error {
+    color: #ef4444;
+}
+
+.signin-msg.success {
+    color: #22c55e;
+}

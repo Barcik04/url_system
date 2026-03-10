@@ -87,6 +87,7 @@ function UrlList() {
     const [open, setOpen] = useState(false);
     const [patchOpen, setPatchOpen] = useState(false);
     const [patchCode, setPatchCode] = useState<string | null>(null);
+    const [msgType, setMsgType] = useState<"success" | "error" | "">("")
 
 
     const [page, setPage] = useState(0);
@@ -109,18 +110,23 @@ function UrlList() {
                 }),
             });
 
+
             if (!res.ok) {
+                setMsgType("error");
                 setMsg(await getApiErrorMessage(res, "Unable to load your URLs."));
                 return;
             }
+
 
             const data: PageResponse<UrlDto> = await res.json();
             console.log("UrlList response:", data); 
             setPageData(data);
             setMsg("");
-        } catch(e) {
+            setMsgType("");
+        } catch (e) {
             console.error(e);
-            setMsg(getNetworkErrorMessage())
+            setMsgType("error");
+            setMsg(getNetworkErrorMessage());
         }
     }
 
@@ -147,7 +153,7 @@ function UrlList() {
                 </div>
 
 
-                {msg && <p>{msg}</p>}
+                {msg && <p className={`url-list-msg ${msgType}`}>{msg}</p>}
 
                 {!pageData ? (
                     <p>Loading...</p>

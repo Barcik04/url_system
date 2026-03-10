@@ -11,15 +11,20 @@ import bin from "../photos/bin.png";
 function Settings() {
     const [open, setOpen] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [msg, setMsg] = useState("");
+    const [msgType, setMsgType] = useState<"success" | "error" | "">("");
 
     useEffect(() => {
         async function loadAvatar() {
             try {
                 const result = await getMyAvatar();
-                console.log("GET AVATAR RESULT:", result);
                 setAvatarUrl(result.avatarUrl);
+                setMsg("");
+                setMsgType("");
             } catch (error) {
                 console.error("Load avatar failed:", error);
+                setMsg("Unable to load avatar.");
+                setMsgType("error");
             }
         }
 
@@ -34,6 +39,8 @@ function Settings() {
                     onAvatarUpdated={setAvatarUrl}
                 />
             </div>
+
+            {msg && <p className={`settings-msg ${msgType}`}>{msg}</p>}
 
             <h1>Settings</h1>
 

@@ -194,3 +194,22 @@ h1 {
     padding: 10px;
     margin: 10px 0 10px 0;
 }
+
+
+
+
+.settings-msg {
+    margin: 12px 0 18px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 22px;
+}
+
+.settings-msg.error {
+    color: #ef4444;
+}
+
+.settings-msg.success {
+    color: #22c55e;
+}

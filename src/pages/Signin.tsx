@@ -28,6 +28,7 @@ function Signin() {
   const [password, setPassword] = useState("")
   const [msg, setMsg] = useState("")
   const navigate = useNavigate()
+  const [msgType, setMsgType] = useState<"success" | "error" | "">("")
 
 
   async function handleSubmit(e: React.FormEvent) {
@@ -40,8 +41,9 @@ function Signin() {
       })
 
       if (!res.ok) {
-        setMsg(await getApiErrorMessage(res, "Sign in failed."))
-        return
+          setMsgType("error");
+          setMsg(await getApiErrorMessage(res, "Sign in failed."));
+          return;
       }
 
       const data = await res.json()
@@ -51,9 +53,11 @@ function Signin() {
       localStorage.setItem("username", data.username ?? "");
 
       navigate("/dashboard");
-      setMsg("signin success")
+      setMsgType("success");
+      setMsg("signin success"); 
     } catch {
-      setMsg(getNetworkErrorMessage())
+      setMsgType("error");
+      setMsg(getNetworkErrorMessage());
     }
   }
 
@@ -64,7 +68,7 @@ function Signin() {
       <input value={password} placeholder="password" onChange={(e) => setPassword(e.target.value)} type="password" />
       <button type="submit">Sign in</button>
       <button type="button" onClick={() => navigate("/signup")}>I Dont have an account yet</button>
-      <p>{msg}</p>
+      <p className={`signin-msg ${msgType}`}>{msg}</p>
     </form>
   )
 }

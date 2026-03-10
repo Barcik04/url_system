@@ -87,6 +87,7 @@ function UrlList() {
     const [hoveredCode, setHoveredCode] = useState<string | null>(null);
     const [patchOpen, setPatchOpen] = useState(false);
     const [patchCode, setPatchCode] = useState<string | null>(null);
+    const [msgType, setMsgType] = useState<"success" | "error" | "">("")
 
 
     const [page, setPage] = useState(0);
@@ -110,7 +111,8 @@ function UrlList() {
             });
 
             if (!res.ok) {
-                setMsg(await getApiErrorMessage(res, "Unable to load your URLs."));
+                setMsgType("error");
+                setMsg(await getApiErrorMessage(res, "Unable to load URLs."));
                 return;
             }
 
@@ -118,9 +120,11 @@ function UrlList() {
             console.log("UrlList response:", data); 
             setPageData(data);
             setMsg("");
+            setMsgType("");
         } catch(e) {
             console.error(e);
-            setMsg(getNetworkErrorMessage())
+            setMsgType("error");
+            setMsg(getNetworkErrorMessage());
         }
     }
 
@@ -182,7 +186,8 @@ function UrlList() {
                     
                     </div>
 
-                    {msg && <p>{msg}</p>}
+                    {msg && <p className={`admin-msg ${msgType}`}>{msg}</p>}
+
 
                     {!pageData ? (
                         <p>Loading...</p>

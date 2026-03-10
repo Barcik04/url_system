@@ -57,3 +57,22 @@ body {
     border-radius: 4px;
     border: none;
 }
+
+
+
+
+.signup-msg {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    min-height: 14px;
+    font-weight: 500;
+}
+
+.signup-msg.success {
+    color: #22c55e;
+}
+
+.signup-msg.error {
+    color: #ef4444;
+}

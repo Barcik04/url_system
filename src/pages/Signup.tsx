@@ -7,6 +7,7 @@ function Signup() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [msg, setMsg] = useState("")
+    const [msgType, setMsgType] = useState<"success" | "error" | "">("")
     const navigate = useNavigate()
 
     async function handleSubmit(e: React.FormEvent) {
@@ -22,14 +23,17 @@ function Signup() {
             })
 
             if (!res.ok) {
+                setMsgType("error")
                 setMsg(await getApiErrorMessage(res, "Account creation failed."))
                 return
             }
 
             await res.json().catch(() => null)
-            setMsg("Account created successfully.")
+            setMsgType("success")
+            setMsg("Account created successfully. Please verify it in your email to signin")
 
         } catch {
+            setMsgType("error")
             setMsg(getNetworkErrorMessage())
         }
     }
@@ -47,7 +51,7 @@ function Signup() {
                 <button type="button" onClick={() => navigate("/signin")}>Go to Sign in</button>
             </form>
 
-            <p>{msg}</p>
+            <p className={`signup-msg ${msgType}`}>{msg}</p>
         </div>        
     )
 }
