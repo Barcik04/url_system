@@ -1,18 +1,17 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     presignAvatarUpload,
     uploadFileToPresignedUrl,
     confirmAvatarUpload,
+    getMyAvatar,
 } from "../avatarService";
 
 type AvatarUploadProps = {
-    token: string;
     currentAvatarUrl?: string | null;
     onAvatarUpdated?: (newAvatarUrl: string | null) => void;
 };
 
 function AvatarUpload({
-    token,
     currentAvatarUrl,
     onAvatarUpdated,
 }: AvatarUploadProps) {
@@ -21,6 +20,8 @@ function AvatarUpload({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const inputRef = useRef<HTMLInputElement | null>(null);
+    console.log("AvatarUpload render");
+
 
     function handleOpenFilePicker() {
         inputRef.current?.click();
@@ -57,7 +58,6 @@ function AvatarUpload({
             const presignResponse = await presignAvatarUpload(selectedFile);
             await uploadFileToPresignedUrl(presignResponse.uploadUrl, selectedFile);
             const confirmedAvatar = await confirmAvatarUpload(presignResponse.key);
-
             setPreviewUrl(confirmedAvatar.avatarUrl ?? null);
 
             if (onAvatarUpdated) {
