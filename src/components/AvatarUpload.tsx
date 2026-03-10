@@ -22,6 +22,10 @@ function AvatarUpload({
     const inputRef = useRef<HTMLInputElement | null>(null);
     console.log("AvatarUpload render");
 
+    useEffect(() => {
+        setPreviewUrl(currentAvatarUrl ?? null);
+    }, [currentAvatarUrl]);
+
 
     function handleOpenFilePicker() {
         inputRef.current?.click();
