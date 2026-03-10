@@ -34,12 +34,20 @@ public class AvatarControllerV1 {
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<UserAvatarResponse> confirm(
             @Valid @RequestBody ConfirmAvatarUploadRequest req,
             Authentication authentication
     ) {
         String name = authentication.getName();
         return ResponseEntity.ok(avatarService.confirmUpload(name, req.key()));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<UserAvatarResponse> getMyAvatar(Authentication authentication) {
+        String name = authentication.getName();
+        return ResponseEntity.ok(avatarService.getCurrentAvatar(name));
     }
 }
 
