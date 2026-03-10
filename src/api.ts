@@ -55,22 +55,28 @@ async function getRefreshedTokenOnce(): Promise<string | null> {
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const token = getAccessToken();
 
-  const doFetch = (accessToken: string | null) => {
+  const normalizedHeaders = new Headers(options.headers ?? undefined);
+    if (!normalizedHeaders.has("Content-Type") && !(options.body instanceof FormData)) {
+      normalizedHeaders.set("Content-Type", "application/json");
+    }
+
+    const doFetch = (accessToken: string | null) => {
+      const headers = new Headers(normalizedHeaders);
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+      }
+
     return fetch(`${API_URL}${path}`, {
       ...options,
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
+      headers,
     });
-  };
+  }
 
   let res = await doFetch(token);
 
-  if (res.status === 401) {
-    const newToken = await getRefreshedTokenOnce();
+  if (res.status === 401 || res.status === 403) {
+        const newToken = await getRefreshedTokenOnce();
 
     if (!newToken) {
       clearAccessToken();
