@@ -18,6 +18,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 @Service
 @Profile("prod & !stage")
@@ -90,7 +92,7 @@ public class AvatarService {
                     .build());
         }
 
-        return new UserAvatarResponse(user.getAvatarKey());
+        return new UserAvatarResponse(buildAvatarUrl(user.getAvatarKey()));
     }
 
     private String extension(String contentType) {
@@ -98,5 +100,31 @@ public class AvatarService {
         if ("image/png".equals(contentType)) return ".png";
         if ("image/webp".equals(contentType)) return ".webp";
         throw new IllegalArgumentException("Unsupported contentType: " + contentType);
+    }
+
+
+    private String buildAvatarUrl(String key) {
+        if (key == null || key.isBlank()) {
+            return null;
+        }
+
+        GetObjectRequest getReq = GetObjectRequest.builder()
+                .bucket(props.bucket())
+                .key(key)
+                .build();
+
+        GetObjectPresignRequest presignReq = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))
+                .getObjectRequest(getReq)
+                .build();
+
+        return presigner.presignGetObject(presignReq).url().toString();
+    }
+
+    public UserAvatarResponse getCurrentAvatar(String userEmailOrUsername) {
+        User user = userRepository.findByUsername(userEmailOrUsername)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        return new UserAvatarResponse(buildAvatarUrl(user.getAvatarKey()));
     }
 }
