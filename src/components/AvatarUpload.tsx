@@ -54,17 +54,21 @@ function AvatarUpload({
             setLoading(true);
             setError("");
 
-            const presignResponse = await presignAvatarUpload(token, selectedFile.type);
+            const presignResponse = await presignAvatarUpload(selectedFile);
             await uploadFileToPresignedUrl(presignResponse.uploadUrl, selectedFile);
-            const confirmedAvatar = await confirmAvatarUpload(token, presignResponse.key);
+            const confirmedAvatar = await confirmAvatarUpload(presignResponse.key);
 
-            setPreviewUrl(confirmedAvatar.avatarUrl);
+            setPreviewUrl(confirmedAvatar.avatarUrl ?? null);
 
             if (onAvatarUpdated) {
-                onAvatarUpdated(confirmedAvatar.avatarUrl);
+                onAvatarUpdated(confirmedAvatar.avatarUrl ?? null);
             }
 
             setSelectedFile(null);
+
+            if (inputRef.current) {
+                inputRef.current.value = "";
+            }
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
