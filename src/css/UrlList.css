@@ -122,3 +122,22 @@
   color: rgba(255,255,255,0.6);
   padding: 0 4px;
 }
+
+
+
+
+.url-list-msg {
+    margin: 12px 0 18px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 22px;
+}
+
+.url-list-msg.error {
+    color: #ef4444;
+}
+
+.url-list-msg.success {
+    color: #22c55e;
+}
