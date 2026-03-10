@@ -31,7 +31,6 @@ function resolveContentType(file: File): string {
 export async function presignAvatarUpload(
   file: File
 ): Promise<PresignAvatarUploadResponse> {
-
   const contentType = resolveContentType(file);
 
   const response = await apiFetch(`/api/v1/users/me/avatar/presign`, {
@@ -51,7 +50,6 @@ export async function uploadFileToPresignedUrl(
   uploadUrl: string,
   file: File
 ): Promise<void> {
-
   const contentType = resolveContentType(file);
 
   const response = await fetch(uploadUrl, {
@@ -71,7 +69,6 @@ export async function uploadFileToPresignedUrl(
 export async function confirmAvatarUpload(
   key: string
 ): Promise<UserAvatarResponse> {
-
   const response = await apiFetch(`/api/v1/users/me/avatar`, {
     method: "PUT",
     body: JSON.stringify({ key }),
@@ -88,14 +85,24 @@ export async function confirmAvatarUpload(
 export async function uploadAvatar(
   file: File
 ): Promise<UserAvatarResponse> {
-
   if (!file) {
     throw new Error("No file selected");
   }
 
   const presign = await presignAvatarUpload(file);
-
   await uploadFileToPresignedUrl(presign.uploadUrl, file);
-
   return confirmAvatarUpload(presign.key);
+}
+
+export async function getMyAvatar(): Promise<UserAvatarResponse> {
+  const response = await apiFetch(`/api/v1/users/me/avatar`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Get avatar failed: ${errorText}`);
+  }
+
+  return response.json();
 }

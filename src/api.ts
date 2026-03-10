@@ -60,9 +60,9 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
       normalizedHeaders.set("Content-Type", "application/json");
     }
 
-    const doFetch = (accessToken: string | null) => {
+    const doFetch = (accessToken: string | null, overrideAuthorization = false) => {
       const headers = new Headers(normalizedHeaders);
-      if (accessToken) {
+      if (accessToken && (overrideAuthorization || !headers.has("Authorization"))) {
         headers.set("Authorization", `Bearer ${accessToken}`);
       }
 
@@ -83,8 +83,8 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
       return res; 
     }
 
-    res = await doFetch(newToken);
-  }
+    res = await doFetch(newToken, true);
+    }
 
   return res;
 }

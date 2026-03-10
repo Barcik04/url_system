@@ -1,24 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import DeleteAccountBtn from "../components/DeleteAccountBtn";
 import AvatarUpload from "../components/AvatarUpload";
+import { getMyAvatar } from "../avatarService";
+
 
 import "../css/Settings.css";
 import bin from "../photos/bin.png";
 
 function Settings() {
     const [open, setOpen] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-    const token = localStorage.getItem("token") || "";
+    useEffect(() => {
+        console.info("settings useEffect works")
+        async function loadAvatar() {
+            try {
+                const result = await getMyAvatar();
+                setAvatarUrl(result.avatarUrl);
+                console.info("settings useEffect works111")
+            } catch (error) {
+                console.error("Load avatar failed:", error);
+            }
+        }
+
+        loadAvatar();
+    }, []);
 
     return (
         <div className="settingsWrap">
-             <div className="avatarTopSection">
-                <AvatarUpload token={token} />
+            <h1 style={{ color: "red" }}>NOWY BUILD SETTINGS</h1>
+            <div className="avatarTopSection">
+                <AvatarUpload
+                    currentAvatarUrl={avatarUrl}
+                    onAvatarUpdated={setAvatarUrl}
+                />
             </div>
 
             <h1>Settings</h1>
-           
 
             <ul className="settingsList">
                 <li>
