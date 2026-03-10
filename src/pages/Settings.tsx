@@ -16,6 +16,7 @@ function Settings() {
         async function loadAvatar() {
             try {
                 const result = await getMyAvatar();
+                console.log("GET AVATAR RESULT:", result);
                 setAvatarUrl(result.avatarUrl);
             } catch (error) {
                 console.error("Load avatar failed:", error);
