@@ -41,6 +41,9 @@ public class UserSubscription {
     @JsonIgnore
     private User user;
 
+    @Column(name = "cancellation_scheduled", nullable = false)
+    private Boolean cancellationScheduled = false;
+
 
     public UserSubscription(String stripeCustomerId, String stripeSubscriptionId, String stripePriceId, SubscriptionStatus status) {
         this.stripeCustomerId = stripeCustomerId;
@@ -134,6 +137,14 @@ public class UserSubscription {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Boolean getCancellationScheduled() {
+        return cancellationScheduled;
+    }
+
+    public void setCancellationScheduled(Boolean cancellationScheduled) {
+        this.cancellationScheduled = cancellationScheduled;
     }
 
     @Override

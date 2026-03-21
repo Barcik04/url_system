@@ -50,4 +50,29 @@ public class SubscriptionController {
                 "message", "Subscription scheduled for cancellation at period end."
         ));
     }
+
+
+
+    @PatchMapping("/resume")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Map<String, String>> resumeMySubscription(
+            @AuthenticationPrincipal UserDetails principal
+    ) throws StripeException {
+
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
+        }
+
+        String username = principal.getUsername();
+
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
+                .getId();
+
+        subscriptionService.resumeMySubscription(userId);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Subscription cancellation has been removed."
+        ));
+    }
 }
