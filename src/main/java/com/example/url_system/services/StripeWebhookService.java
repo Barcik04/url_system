@@ -70,29 +70,11 @@ public class StripeWebhookService {
             throw new RuntimeException("Missing userId in Stripe session metadata");
         }
 
+
         Long userId = Long.parseLong(session.getMetadata().get("userId"));
         System.out.println("Parsed userId: " + userId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
-
-        UserSubscription userSubscription = userSubscriptionRepository.findByUserId(userId)
-                .orElseGet(UserSubscription::new);
-
-        userSubscription.setUser(user);
-        userSubscription.setStripeCustomerId(session.getCustomer());
-        userSubscription.setStripeSubscriptionId(session.getSubscription());
-        userSubscription.setStatus(SubscriptionStatus.INCOMPLETE);
-        userSubscription.setUpdatedAt(Instant.now());
-
-        if (userSubscription.getCreatedAt() == null) {
-            userSubscription.setCreatedAt(Instant.now());
-        }
-
-        userSubscriptionRepository.save(userSubscription);
-
-        System.out.println("Saved subscription for userId: " + userId);
     }
+
 
     @Transactional
     public void handleCustomerSubscriptionChanged(Event event) {
@@ -108,27 +90,27 @@ public class StripeWebhookService {
         System.out.println("Subscription status: " + subscription.getStatus());
         System.out.println("Subscription metadata: " + subscription.getMetadata());
 
-        UserSubscription userSubscription = userSubscriptionRepository
-                .findByStripeSubscriptionId(subscription.getId())
-                .orElseGet(UserSubscription::new);
-
-        if (userSubscription.getUser() == null) {
-            if (subscription.getMetadata() == null || subscription.getMetadata().get("userId") == null) {
-                throw new RuntimeException("Missing userId in subscription metadata");
-            }
-
-            Long userId = Long.parseLong(subscription.getMetadata().get("userId"));
-
-            User foundUser = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
-
-            userSubscription.setUser(foundUser);
+        if (subscription.getMetadata() == null || subscription.getMetadata().get("userId") == null) {
+            throw new RuntimeException("Missing userId in subscription metadata");
         }
 
+        Long userId = Long.parseLong(subscription.getMetadata().get("userId"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
+
+        UserSubscription userSubscription = userSubscriptionRepository
+                .findByUserId(userId)
+                .orElseGet(UserSubscription::new);
+
+        userSubscription.setUser(user);
         userSubscription.setStripeCustomerId(subscription.getCustomer());
         userSubscription.setStripeSubscriptionId(subscription.getId());
         userSubscription.setStatus(mapStripeStatus(subscription.getStatus()));
         userSubscription.setUpdatedAt(Instant.now());
+        userSubscription.setCancellationScheduled(
+                Boolean.TRUE.equals(subscription.getCancelAtPeriodEnd())
+        );
 
         Instant subscriptionEnd = extractSubscriptionEnd(subscription);
         if (subscriptionEnd != null) {
@@ -147,8 +129,6 @@ public class StripeWebhookService {
         if (userSubscription.getCreatedAt() == null) {
             userSubscription.setCreatedAt(Instant.now());
         }
-
-        User user = userSubscription.getUser();
 
         if (userSubscription.getStatus() == SubscriptionStatus.ACTIVE
                 || userSubscription.getStatus() == SubscriptionStatus.TRIALING) {
@@ -185,6 +165,7 @@ public class StripeWebhookService {
 
         userSubscription.setStatus(SubscriptionStatus.CANCELED);
         userSubscription.setUpdatedAt(Instant.now());
+        userSubscription.setCancellationScheduled(false);
 
         Instant subscriptionEnd = extractSubscriptionEnd(subscription);
         userSubscription.setSubscriptionEnd(subscriptionEnd != null ? subscriptionEnd : Instant.now());

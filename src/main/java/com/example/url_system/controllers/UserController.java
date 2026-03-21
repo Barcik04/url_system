@@ -1,36 +1,32 @@
 package com.example.url_system.controllers;
 
-import com.example.url_system.dtos.stripe.StripeCheckoutResponse;
-import com.example.url_system.models.User;
+import com.example.url_system.dtos.UserPlanResponse;
+import com.example.url_system.models.Plan;
 import com.example.url_system.repositories.UserRepository;
-import com.example.url_system.services.StripeService;
-import com.stripe.exception.StripeException;
+import com.example.url_system.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/v1/stripe")
-public class StripeController {
-
-    private final StripeService stripeService;
+@RequestMapping("api/v1/users")
+public class UserController {
+    private final UserService userService;
     private final UserRepository userRepository;
 
-    public StripeController(StripeService stripeService, UserRepository userRepository) {
-        this.stripeService = stripeService;
+    public UserController(UserService userService, UserRepository userRepository) {
+        this.userService = userService;
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/checkout")
+    @GetMapping("/my-plan")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<StripeCheckoutResponse> createCheckoutSession(@AuthenticationPrincipal UserDetails principal) throws StripeException {
+    public UserPlanResponse getMyPlan(@AuthenticationPrincipal UserDetails principal) {
         if (principal == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
         }
@@ -40,9 +36,6 @@ public class StripeController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"))
                 .getId();
 
-        StripeCheckoutResponse response = stripeService.createCheckoutSession(userId);
-
-        return ResponseEntity.ok(response);
+        return userService.getSubscriptionPlan(userId);
     }
-
 }
