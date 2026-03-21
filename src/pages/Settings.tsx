@@ -4,6 +4,7 @@ import DeleteAccountBtn from "../components/DeleteAccountBtn";
 import AvatarUpload from "../components/AvatarUpload";
 import { getMyAvatar } from "../avatarService";
 
+import { Link } from "react-router-dom";
 
 import "../css/Settings.css";
 import bin from "../photos/bin.png";
@@ -45,9 +46,15 @@ function Settings() {
             <h1>Settings</h1>
 
             <ul className="settingsList">
-                <li>
-                    <a>Delete account</a>
+                <li className="settingsItem">
+                    <span className="settingsLabel">Subscriptions</span>
+                    <Link to="/subscriptions" className="subscriptionsLink">
+                        Open
+                    </Link>
+                </li>
 
+                <li className="settingsItem">
+                    <span className="settingsLabel">Delete account</span>
                     <button
                         className="deleteAccountBtn"
                         onClick={() => setOpen(true)}

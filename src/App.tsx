@@ -12,6 +12,7 @@ import Start from "./pages/Start";
 import RequireAuth from "./components/RequireAuth";
 import RequireRole from "./components/RequireRole";
 import Settings from "./pages/Settings";
+import Subscriptions from "./pages/Subscriptions";
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   return (
@@ -90,6 +91,17 @@ function AnimatedRoutes() {
             <PageTransition>
               <RequireAuth>
                 <Settings />
+              </RequireAuth>
+            </PageTransition>
+          }
+        />
+
+        <Route
+          path="/subscriptions"
+          element={
+            <PageTransition>
+              <RequireAuth>
+                <Subscriptions />
               </RequireAuth>
             </PageTransition>
           }
