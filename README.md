@@ -1,4 +1,3 @@
-<img width="1263" height="675" alt="image" src="https://github.com/user-attachments/assets/b653d84a-a6a2-4bf5-9706-e74ab13fbe7e" />
 ### ABOUT
     This project is a URL shortening platform built as a REST API.
     
@@ -194,13 +193,13 @@
     -- Resilience4j (Bulkhead, Retry, CircuitBreaker)
     -- Redis caching
     -- Async thread pool config
-    -- Scheduled email sending on expired urls with Kafka (Async, Outbox) for dev, Amazon SQS for prod with Lambda Email Sender
+    -- Scheduled email sending on expired urls with Kafka (Async, Outbox) for dev, Amazon SQS for prod
     -- Kafka (email messaging)
     -- Dynamic filtering 
     -- Grafana Alerts
     -- S3 user avatar image upload
-    --AWS Elasti Cache
-    --Cloudront domain 
+
+
 
 
 
@@ -210,7 +209,11 @@
 
 
 ## WHAT TO DO
+    -- AWS
+    -- CD auto deploy to ECR
+    -- react
     -- Kubernetes
+    first ill generate a db schema graph from my migration files. Then architecture graph. Then lifecycle graph
 
     ### LEAVE IT FOR NOW:
         -- Admin panel (user list, disable/ban user, role changes)
@@ -227,3 +230,8 @@
         -- NO SQL (maybe)
 
 
+
+
+### TOMORROW
+    - BUILD ECS, Sercurity Groups from scratch 
+    - ENV wars in secret manager?

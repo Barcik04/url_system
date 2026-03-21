@@ -3,6 +3,7 @@ package com.example.url_system.services;
 import com.example.url_system.dtos.*;
 
 import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
+import com.example.url_system.exceptions.SubscriptionRestriction;
 import com.example.url_system.exceptions.UrlExpiredException;
 import com.example.url_system.models.*;
 import com.example.url_system.repositories.IdempotencyKeyRepository;
@@ -81,6 +82,17 @@ public class UrlService {
         IdempotencyKeys idem;
         boolean isRetry = false;
 
+
+        if (userId != null) {
+            int numOfUsersUrls = urlRepository.findAllByUser_Id(userId).size();
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+            if (numOfUsersUrls >= 10 && user.getPlan().equals(Plan.REGULAR)) {
+                throw new SubscriptionRestriction("Please update your subscription plan to hold more than 10 urls");
+            }
+        }
+
         try {
             idem = idempotencyKeyRepository.save(
                     new IdempotencyKeys(OP_CREATE_URL, idempotencyKey)
@@ -91,6 +103,7 @@ public class UrlService {
                     .findByOperationAndIdempotencyKey(OP_CREATE_URL, idempotencyKey)
                     .orElseThrow(() -> new NoSuchElementException("Idempotency Key Not Found"));
         }
+
 
         // ---------- RETRY PATH ----------
         if (isRetry) {

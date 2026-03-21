@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/actuator/**",
                                 "/api/v1/urls",
-                                "/{code}"
+                                "/{code}",
+                                "/api/v1/stripe/webhook"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

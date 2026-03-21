@@ -1,9 +1,7 @@
 package com.example.url_system.exceptions;
 
-import jakarta.persistence.ElementCollection;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import org.hibernate.AssertionFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.CannotAcquireLockException;
@@ -352,5 +350,24 @@ public class GlobalExceptionHandler {
         log.warn("Credentials invalid: {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+
+    @ExceptionHandler(SubscriptionRestriction.class)
+    public  ResponseEntity<ApiError> handleSubscriptionRestriction(
+            TransactionSystemException ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                ex.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ZonedDateTime.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        log.warn("Subscription plan restriction: {} {} {} {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), apiError.status());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
     }
 }

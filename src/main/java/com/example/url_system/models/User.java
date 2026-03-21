@@ -53,6 +53,15 @@ public class User {
     @Column(name = "avatar_key")
     private String avatarKey;
 
+    @Column(name = "subscription_plan", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Plan plan = Plan.REGULAR;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private UserSubscription userSubscription;
+
+
 
 
     public User(String username, String password, Role role) {
@@ -164,6 +173,22 @@ public class User {
 
     public void setAvatarKey(String avatarKey) {
         this.avatarKey = avatarKey;
+    }
+
+    public Plan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(Plan plan) {
+        this.plan = plan;
+    }
+
+    public UserSubscription getUserSubscription() {
+        return userSubscription;
+    }
+
+    public void setUserSubscription(UserSubscription userSubscription) {
+        this.userSubscription = userSubscription;
     }
 
     @Override
