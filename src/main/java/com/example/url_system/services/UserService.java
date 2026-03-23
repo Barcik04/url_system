@@ -7,23 +7,33 @@ import com.example.url_system.models.SubscriptionStatus;
 import com.example.url_system.models.User;
 import com.example.url_system.models.UserSubscription;
 import com.example.url_system.repositories.UserRepository;
+import com.example.url_system.repositories.UserSubscriptionRepository;
+import com.stripe.exception.StripeException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserSubscriptionRepository userSubscriptionRepository;
+    private final SubscriptionService subscriptionService;
 
 
-    public UserService(UserRepository userRepository,  PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserSubscriptionRepository userSubscriptionRepository, SubscriptionService subscriptionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userSubscriptionRepository = userSubscriptionRepository;
+        this.subscriptionService = subscriptionService;
     }
 
-    public void deleteAccount(Long userId, String password) {
+
+    @Transactional
+    public void deleteAccount(Long userId, String password) throws StripeException {
         if (userId == null) {
             throw new IllegalArgumentException("userdid cant be null");
         }
@@ -39,10 +49,26 @@ public class UserService {
             throw new IllegalArgumentException("passwords incorrect");
         }
 
+        Optional<UserSubscription> optionalSubscription = userSubscriptionRepository
+                .findByUserId(userId);
+
+        if (optionalSubscription.isPresent()) {
+            UserSubscription userSubscription = optionalSubscription.get();
+
+            if (userSubscription.getStatus() != SubscriptionStatus.CANCELED
+                    && userSubscription.getStripeSubscriptionId() != null
+                    && !userSubscription.getStripeSubscriptionId().isBlank()) {
+                subscriptionService.cancelSubscriptionImmediately(userId);
+            }
+
+            userSubscriptionRepository.delete(userSubscription);
+        }
+
         userRepository.delete(user);
     }
 
 
+    @Transactional(readOnly = true)
     public UserPlanResponse getSubscriptionPlan(Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userid cant be null");
