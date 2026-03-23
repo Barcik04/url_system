@@ -145,6 +145,8 @@ public class StripeWebhookService {
         System.out.println("Saved subscriptionEnd: " + userSubscription.getSubscriptionEnd());
     }
 
+
+
     @Transactional
     public void handleCustomerSubscriptionDeleted(Event event) {
         StripeObject stripeObject = event.getDataObjectDeserializer()
@@ -159,9 +161,12 @@ public class StripeWebhookService {
 
         UserSubscription userSubscription = userSubscriptionRepository
                 .findByStripeSubscriptionId(subscription.getId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Subscription not found in database: " + subscription.getId()
-                ));
+                .orElse(null);
+
+        if (userSubscription == null) {
+            System.out.println("Subscription already removed locally: " + subscription.getId());
+            return;
+        }
 
         userSubscription.setStatus(SubscriptionStatus.CANCELED);
         userSubscription.setUpdatedAt(Instant.now());

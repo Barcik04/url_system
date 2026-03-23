@@ -42,6 +42,23 @@ public class SubscriptionService {
 
 
     @Transactional
+    public void cancelSubscriptionImmediately(Long userId) throws StripeException {
+        UserSubscription userSubscription = userSubscriptionRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Subscription for user not found"));
+
+        String stripeSubscriptionId = userSubscription.getStripeSubscriptionId();
+
+        if (stripeSubscriptionId == null || stripeSubscriptionId.isBlank()) {
+            throw new RuntimeException("User does not have Stripe subscription id");
+        }
+
+        stripeClient.v1().subscriptions().cancel(stripeSubscriptionId);
+    }
+
+
+
+
+    @Transactional
     public void resumeMySubscription(Long userId) throws StripeException {
         UserSubscription userSubscription = userSubscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Subscription for user not found"));
