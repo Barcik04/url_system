@@ -7,6 +7,7 @@ import com.example.url_system.repositories.UserRepository;
 import com.example.url_system.services.UrlService;
 import com.example.url_system.services.UserService;
 import com.example.url_system.utils.dynamicFiltering.UrlFilter;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -274,7 +275,7 @@ public class UrlControllerV1 {
 
 
     @DeleteMapping("api/v1/delete-account")
-    public void deleteAcc(@RequestBody DeleteAccountRequest req, @AuthenticationPrincipal UserDetails principal) {
+    public void deleteAcc(@RequestBody DeleteAccountRequest req, @AuthenticationPrincipal UserDetails principal) throws StripeException {
         if (principal == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
         }
