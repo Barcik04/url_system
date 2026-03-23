@@ -42,6 +42,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
+
     public UserPlanResponse getSubscriptionPlan(Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("userid cant be null");
@@ -53,7 +54,11 @@ public class UserService {
         UserSubscription userSubscription = user.getUserSubscription();
 
         if (userSubscription == null) {
-            throw new NoSuchElementException("userSubscription not found");
+            return new UserPlanResponse(
+                    Plan.REGULAR,
+                    false,
+                    null
+            );
         }
 
         return new UserPlanResponse(
