@@ -12,6 +12,7 @@ function Settings() {
     const [msg, setMsg] = useState("");
     const [msgType, setMsgType] = useState<"success" | "error" | "">("");
     const [isAvatarPreviewVisible, setIsAvatarPreviewVisible] = useState(false);
+    const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
     const [isAvatarPreviewClosing, setIsAvatarPreviewClosing] = useState(false);
 
     useEffect(() => {
@@ -33,12 +34,18 @@ function Settings() {
 
     function openAvatarPreview() {
         if (!avatarUrl) return;
-        setIsAvatarPreviewClosing(false);
+
         setIsAvatarPreviewVisible(true);
+        setIsAvatarPreviewClosing(false);
+
+        requestAnimationFrame(() => {
+            setIsAvatarPreviewOpen(true);
+        });
     }
 
     function closeAvatarPreview() {
         setIsAvatarPreviewClosing(true);
+        setIsAvatarPreviewOpen(false);
 
         setTimeout(() => {
             setIsAvatarPreviewVisible(false);
@@ -89,7 +96,7 @@ function Settings() {
 
             {isAvatarPreviewVisible && avatarUrl && (
                 <div
-                    className={`avatarPreviewOverlay ${isAvatarPreviewClosing ? "closing" : "open"}`}
+                    className={`avatarPreviewOverlay ${isAvatarPreviewOpen ? "open" : ""} ${isAvatarPreviewClosing ? "closing" : ""}`}
                     onClick={closeAvatarPreview}
                 >
                     <div
