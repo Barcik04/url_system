@@ -11,7 +11,8 @@ function Settings() {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [msg, setMsg] = useState("");
     const [msgType, setMsgType] = useState<"success" | "error" | "">("");
-    const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
+    const [isAvatarPreviewVisible, setIsAvatarPreviewVisible] = useState(false);
+    const [isAvatarPreviewClosing, setIsAvatarPreviewClosing] = useState(false);
 
     useEffect(() => {
         async function loadAvatar() {
@@ -30,13 +31,28 @@ function Settings() {
         loadAvatar();
     }, []);
 
+    function openAvatarPreview() {
+        if (!avatarUrl) return;
+        setIsAvatarPreviewClosing(false);
+        setIsAvatarPreviewVisible(true);
+    }
+
+    function closeAvatarPreview() {
+        setIsAvatarPreviewClosing(true);
+
+        setTimeout(() => {
+            setIsAvatarPreviewVisible(false);
+            setIsAvatarPreviewClosing(false);
+        }, 300);
+    }
+
     return (
         <div className="settingsWrap">
             <div className="avatarTopSection">
                 <AvatarUpload
                     currentAvatarUrl={avatarUrl}
                     onAvatarUpdated={setAvatarUrl}
-                    onPreviewClick={() => avatarUrl && setIsAvatarPreviewOpen(true)}
+                    onPreviewClick={openAvatarPreview}
                 />
             </div>
 
@@ -71,16 +87,15 @@ function Settings() {
                 </div>
             )}
 
-            {isAvatarPreviewOpen && avatarUrl && (
+            {isAvatarPreviewVisible && avatarUrl && (
                 <div
-                    className="avatarPreviewOverlay"
-                    onClick={() => setIsAvatarPreviewOpen(false)}
+                    className={`avatarPreviewOverlay ${isAvatarPreviewClosing ? "closing" : "open"}`}
+                    onClick={closeAvatarPreview}
                 >
                     <div
                         className="avatarPreviewContent"
                         onClick={(e) => e.stopPropagation()}
                     >
-
                         <img
                             src={avatarUrl}
                             alt="Avatar preview"
