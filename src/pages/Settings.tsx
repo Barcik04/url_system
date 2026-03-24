@@ -80,12 +80,6 @@ function Settings() {
                         className="avatarPreviewContent"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
-                            className="avatarPreviewCloseBtn"
-                            onClick={() => setIsAvatarPreviewOpen(false)}
-                        >
-                            ×
-                        </button>
 
                         <img
                             src={avatarUrl}
