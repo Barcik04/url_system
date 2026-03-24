@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
-
 import DeleteAccountBtn from "../components/DeleteAccountBtn";
 import AvatarUpload from "../components/AvatarUpload";
 import { getMyAvatar } from "../avatarService";
-
 import { Link } from "react-router-dom";
-
 import "../css/Settings.css";
 import bin from "../photos/bin.png";
 
@@ -14,6 +11,7 @@ function Settings() {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [msg, setMsg] = useState("");
     const [msgType, setMsgType] = useState<"success" | "error" | "">("");
+    const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
 
     useEffect(() => {
         async function loadAvatar() {
@@ -38,6 +36,7 @@ function Settings() {
                 <AvatarUpload
                     currentAvatarUrl={avatarUrl}
                     onAvatarUpdated={setAvatarUrl}
+                    onPreviewClick={() => avatarUrl && setIsAvatarPreviewOpen(true)}
                 />
             </div>
 
@@ -68,6 +67,31 @@ function Settings() {
                 <div className="overlay" onClick={() => setOpen(false)}>
                     <div onClick={(e) => e.stopPropagation()}>
                         <DeleteAccountBtn />
+                    </div>
+                </div>
+            )}
+
+            {isAvatarPreviewOpen && avatarUrl && (
+                <div
+                    className="avatarPreviewOverlay"
+                    onClick={() => setIsAvatarPreviewOpen(false)}
+                >
+                    <div
+                        className="avatarPreviewContent"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="avatarPreviewCloseBtn"
+                            onClick={() => setIsAvatarPreviewOpen(false)}
+                        >
+                            ×
+                        </button>
+
+                        <img
+                            src={avatarUrl}
+                            alt="Avatar preview"
+                            className="avatarPreviewImage"
+                        />
                     </div>
                 </div>
             )}

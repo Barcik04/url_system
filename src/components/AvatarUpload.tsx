@@ -3,29 +3,28 @@ import {
     presignAvatarUpload,
     uploadFileToPresignedUrl,
     confirmAvatarUpload,
-    getMyAvatar,
 } from "../avatarService";
 
 type AvatarUploadProps = {
     currentAvatarUrl?: string | null;
     onAvatarUpdated?: (newAvatarUrl: string | null) => void;
+    onPreviewClick?: () => void;
 };
 
 function AvatarUpload({
     currentAvatarUrl,
     onAvatarUpdated,
+    onPreviewClick,
 }: AvatarUploadProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(currentAvatarUrl ?? null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const inputRef = useRef<HTMLInputElement | null>(null);
-    console.log("AvatarUpload render");
 
     useEffect(() => {
         setPreviewUrl(currentAvatarUrl ?? null);
     }, [currentAvatarUrl]);
-
 
     function handleOpenFilePicker() {
         inputRef.current?.click();
@@ -62,6 +61,7 @@ function AvatarUpload({
             const presignResponse = await presignAvatarUpload(selectedFile);
             await uploadFileToPresignedUrl(presignResponse.uploadUrl, selectedFile);
             const confirmedAvatar = await confirmAvatarUpload(presignResponse.key);
+
             setPreviewUrl(confirmedAvatar.avatarUrl ?? null);
 
             if (onAvatarUpdated) {
@@ -86,7 +86,7 @@ function AvatarUpload({
 
     return (
         <div className="avatarUploadWrap">
-            <div className="avatarBox" onClick={handleOpenFilePicker}>
+            <div className="avatarBox" onClick={onPreviewClick}>
                 {previewUrl ? (
                     <img src={previewUrl} alt="User avatar" className="avatarImage" />
                 ) : (
