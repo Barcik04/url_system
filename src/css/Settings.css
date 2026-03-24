@@ -294,3 +294,53 @@ h1 {
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     transform: scale(1.08);
 }
+
+
+.avatarPreviewOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.avatarPreviewContent {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatarPreviewImage {
+    width: min(90vw, 520px);
+    height: min(90vw, 520px);
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.16);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+.avatarPreviewCloseBtn {
+    position: absolute;
+    top: -18px;
+    right: -18px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: 0.18s ease;
+}
+
+.avatarPreviewCloseBtn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.08);
+}
