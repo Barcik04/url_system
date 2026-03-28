@@ -1,5 +1,8 @@
-package com.example.url_system.dtos;
+package com.example.url_system.dtos.mappers;
 
+import com.example.url_system.dtos.CreateResponseUrlDto;
+import com.example.url_system.dtos.StatsUrlDto;
+import com.example.url_system.dtos.UrlResponseDto;
 import com.example.url_system.models.Url;
 import org.springframework.data.domain.Page;
 

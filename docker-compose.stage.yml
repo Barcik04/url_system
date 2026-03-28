@@ -45,6 +45,7 @@ services:
       SPRING_PROFILES_ACTIVE: stage
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     ports:
       - "8080:8080"
     networks:

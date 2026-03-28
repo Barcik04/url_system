@@ -7,9 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -61,7 +59,9 @@ public class User {
     @JsonIgnore
     private UserSubscription userSubscription;
 
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ChatConversation> conversations = new ArrayList<>();
 
 
     public User(String username, String password, Role role) {
@@ -189,6 +189,14 @@ public class User {
 
     public void setUserSubscription(UserSubscription userSubscription) {
         this.userSubscription = userSubscription;
+    }
+
+    public List<ChatConversation> getConversations() {
+        return conversations;
+    }
+
+    public void setConversations(List<ChatConversation> conversations) {
+        this.conversations = conversations;
     }
 
     @Override

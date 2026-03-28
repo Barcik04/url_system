@@ -2,6 +2,7 @@ package com.example.url_system.services;
 
 import com.example.url_system.dtos.*;
 
+import com.example.url_system.dtos.mappers.UrlMapper;
 import com.example.url_system.exceptions.ResponseAlreadyBeingProcessed;
 import com.example.url_system.exceptions.SubscriptionRestriction;
 import com.example.url_system.exceptions.UrlExpiredException;
