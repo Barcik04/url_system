@@ -13,6 +13,7 @@ import RequireAuth from "./components/RequireAuth";
 import RequireRole from "./components/RequireRole";
 import Settings from "./pages/Settings";
 import Subscriptions from "./pages/Subscriptions";
+import ChatWidget from "./components/ChatWidget"; // <- dodaj to
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   return (
@@ -120,6 +121,8 @@ function App() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <AnimatedRoutes />
+
+      <ChatWidget /> {/* <- tutaj */}
     </BrowserRouter>
   );
 }
