@@ -64,7 +64,6 @@ class OutboxPipelineKafkaTest {
     static void kafkaProps(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 
-        // Optional but helpful: producer reliability in tests
         registry.add("spring.kafka.producer.acks", () -> "all");
         registry.add("spring.kafka.producer.properties.delivery.timeout.ms", () -> "30000");
         registry.add("spring.kafka.producer.properties.request.timeout.ms", () -> "10000");
@@ -83,7 +82,6 @@ class OutboxPipelineKafkaTest {
 
     @BeforeAll
     static void createTopic() throws Exception {
-        // Create topic explicitly => no dependency on auto-create-topics config
         Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
 
@@ -91,7 +89,6 @@ class OutboxPipelineKafkaTest {
             NewTopic topic = new NewTopic(TOPIC, 1, (short) 1);
             admin.createTopics(List.of(topic)).all().get(10, TimeUnit.SECONDS);
         } catch (Exception ignored) {
-            // If it already exists, fine.
         }
     }
 
