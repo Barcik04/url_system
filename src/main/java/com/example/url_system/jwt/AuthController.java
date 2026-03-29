@@ -319,10 +319,10 @@ public class AuthController {
     private void setRefreshCookie(HttpServletResponse response, String rawRefreshToken, int maxAgeSeconds) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, rawRefreshToken)
                 .httpOnly(true)
-                .secure(true) // true in prod
+                .secure(true)
                 .path("/")
                 .maxAge(maxAgeSeconds)
-                .sameSite("Lax") // "None" if cross-site + Secure=true
+                .sameSite("Lax")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -331,7 +331,7 @@ public class AuthController {
     private void clearRefreshCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, "")
                 .httpOnly(true)
-                .secure(true) // true in prod
+                .secure(true)
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")
